@@ -1,0 +1,14 @@
+{
+  "minimum": {
+    "amount": 0,
+    "currency": "CZK"
+  },
+  "maximum": {
+    "amount": 250000,
+    "currency": "CZK"
+  },
+  "step": {
+    "amount": 50000,
+    "currency": "CZK"
+  }
+}

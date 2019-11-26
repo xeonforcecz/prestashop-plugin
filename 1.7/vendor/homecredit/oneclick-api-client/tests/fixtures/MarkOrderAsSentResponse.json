@@ -1,0 +1,49 @@
+{
+	"number": "11800044",
+	"variableSymbols": [
+		"11800044"
+	],
+	"totalPrice": {
+		"amount": 419800,
+		"currency": "CZK"
+	},
+	"totalVat": [
+		{
+			"amount": 72900,
+			"currency": "CZK",
+			"vatRate": 21
+		}
+	],
+	"addresses": [
+		{
+			"country": "CZ",
+			"city": "asdf",
+			"streetAddress": "asd 555",
+			"streetNumber": "777",
+			"zip": "12111",
+			"addressType": "BILLING"
+		}
+	],
+	"state": "SENT",
+	"items": [
+		{
+			"code": "SM.stK01",
+			"name": "Dětský psací stůl - TYP 1",
+			"quantity": 1,
+			"totalPrice": {
+				"amount": 399900,
+				"currency": "CZK"
+			},
+			"totalVat": {
+				"amount": 399900,
+				"currency": "CZK",
+				"vatRate": 21
+			}
+		}
+	],
+	"applicationInfo": {
+		"id": "01-aceba268-8093-4a28-a344-8bfbad7a284c",
+		"state": "READY",
+		"stateReason": "READY_SHIPPED"
+	}
+}

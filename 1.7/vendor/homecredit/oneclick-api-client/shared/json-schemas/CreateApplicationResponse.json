@@ -1,0 +1,521 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema#",
+  "type": "object",
+  "properties": {
+    "id": {
+      "type": "string",
+      "description": "Unique identifier in HCO"
+    },
+    "state": {
+      "type": "string",
+      "enum": [
+        "PROCESSING",
+        "READY",
+        "REJECTED",
+        "CANCELLED"
+      ],
+      "description": "Application state."
+    },
+    "stateReason": {
+      "type": "string",
+      "enum": [
+        "PROCESSING_REDIRECT_NEEDED",
+        "PROCESSING_PREAPPROVED",
+        "REJECTED",
+        "PROCESSING_APPROVED",
+        "PROCESSING_REVIEW",
+        "PROCESSING_ALT_OFFER",
+        "PROCESSING_SIGNED",
+        "CANCELLED_NOT_PAID",
+        "READY_TO_SHIP",
+        "READY_SHIPPED",
+        "READY_DELIVERING",
+        "READY_DELIVERED",
+        "READY_PAID",
+        "CANCELLED_RETURNED"
+      ],
+      "description": "Describes internal state of application, e.g. when state is PROCESSING - reason why application remains in processing state"
+    },
+    "customer": {
+      "type": "object",
+      "properties": {
+        "firstName": {
+          "type": "string",
+          "description": "Customer first (given) name. Must be paired with `lastName`. Required if `fullName` is empty."
+        },
+        "lastName": {
+          "type": "string",
+          "description": "Customer last (family) name. Must be paired with `firstName`. Required if `fullName` is empty."
+        },
+        "fullName": {
+          "type": "string",
+          "description": "Customer full name, including academical degrees and salutation. Required only if `firstName` and `lastName` are empty."
+        },
+        "email": {
+          "type": "string",
+          "description": "E-mail address of customer"
+        },
+        "phone": {
+          "type": "string",
+          "description": "Phone number with country code (including leading `+`)"
+        },
+        "addresses": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "name": {
+                "type": "string",
+                "description": "Name on address"
+              },
+              "country": {
+                "type": "string",
+                "description": "Country.\n(see [ISO 3166 alpha-2](https://en.wikipedia.org/wiki/ISO_3166-1_alpha-2))"
+              },
+              "city": {
+                "type": "string",
+                "description": "City."
+              },
+              "streetAddress": {
+                "type": "string",
+                "description": "Street/city part."
+              },
+              "streetNumber": {
+                "type": "string",
+                "description": "Street number"
+              },
+              "zip": {
+                "type": "string",
+                "description": "Postal code"
+              },
+              "addressType": {
+                "type": "string",
+                "enum": [
+                  "PERMANENT",
+                  "CONTACT",
+                  "DELIVERY",
+                  "BILLING"
+                ],
+                "description": "Type of the address. Only some of the types are allowed in each context."
+              }
+            },
+            "required": [
+              "city",
+              "streetAddress",
+              "streetNumber",
+              "zip"
+            ]
+          },
+          "description": "Addresses. All types are allowed."
+        },
+        "tin": {
+          "type": "string",
+          "description": "Tax identification number (ICO)"
+        }
+      },
+      "required": [
+        "email",
+        "phone"
+      ],
+      "description": "Customer data"
+    },
+    "order": {
+      "type": "object",
+      "properties": {
+        "number": {
+          "type": "string",
+          "description": "Order number (internal for e-shop)"
+        },
+        "variableSymbols": {
+          "type": "array",
+          "items": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "string"
+            }
+          ],
+          "description": "Variable symbols (internal for e-shop). For the financing type `INSTALLMENT` the first VS in this array is used as the VS of the reconciliation payment."
+        },
+        "totalPrice": {
+          "type": "object",
+          "properties": {
+            "amount": {
+              "type": "number",
+              "description": "Amount in minor units (1259950 represents 12599,50 CZK) [ISO 4217](https://en.wikipedia.org/wiki/ISO_4217)"
+            },
+            "currency": {
+              "type": "string",
+              "description": "Amount currency. [ISO 4217](https://en.wikipedia.org/wiki/ISO_4217). Currenty only CZK is allowed."
+            }
+          },
+          "required": [
+            "amount",
+            "currency"
+          ],
+          "description": "Total order amount, including VAT"
+        },
+        "totalVat": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "amount": {
+                "type": "number",
+                "description": "Amount in minor units (188992 represents 1889,92 CZK) [ISO 4217](https://en.wikipedia.org/wiki/ISO_4217)"
+              },
+              "currency": {
+                "type": "string",
+                "description": "Amount currency. [ISO 4217](https://en.wikipedia.org/wiki/ISO_4217). Currenty only CZK is allowed."
+              },
+              "vatRate": {
+                "type": "number",
+                "description": "VAT rate as natural number (15 represents 15% rate)"
+              }
+            },
+            "required": [
+              "amount",
+              "currency",
+              "vatRate"
+            ]
+          },
+          "description": "Total VAT amounts split by their VAT rates"
+        },
+        "addresses": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "name": {
+                "type": "string",
+                "description": "Name on address"
+              },
+              "country": {
+                "type": "string",
+                "description": "Country.\n(see [ISO 3166 alpha-2](https://en.wikipedia.org/wiki/ISO_3166-1_alpha-2))"
+              },
+              "city": {
+                "type": "string",
+                "description": "City."
+              },
+              "streetAddress": {
+                "type": "string",
+                "description": "Street/city part."
+              },
+              "streetNumber": {
+                "type": "string",
+                "description": "Street number"
+              },
+              "zip": {
+                "type": "string",
+                "description": "Postal code"
+              },
+              "addressType": {
+                "type": "string",
+                "enum": [
+                  "PERMANENT",
+                  "CONTACT",
+                  "DELIVERY",
+                  "BILLING"
+                ],
+                "description": "Type of the address. Only some of the types are allowed in each context."
+              }
+            },
+            "required": [
+              "country",
+              "city",
+              "streetAddress",
+              "streetNumber",
+              "zip",
+              "addressType"
+            ]
+          },
+          "description": "Addresses. Only `BILLING` and `DELIVERY` types are allowed."
+        },
+        "deliveryType": {
+          "type": "string",
+          "enum": [
+            "DELIVERY_CARRIER",
+            "PERSONAL_BRANCH",
+            "PERSONAL_PARTNER",
+            "ONLINE"
+          ],
+          "description": "Delivery type."
+        },
+        "reservationDate": {
+          "type": "string",
+          "description": "Date and time until order is reserved. After this date and time, e-shop does not guarantee items availability (e.g. if application processing is longer, it may endanger order fullfillment)."
+        },
+        "items": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "code": {
+                "type": "string",
+                "description": "Internal code for item (internal to e-shop). Used to better identify the item for future changes"
+              },
+              "ean": {
+                "type": "string",
+                "description": "EAN code."
+              },
+              "name": {
+                "type": "string",
+                "description": "Item name"
+              },
+              "quantity": {
+                "type": "number",
+                "description": "Item quantity. If empty, considered as 1."
+              },
+              "type": {
+                "type": "string",
+                "enum": [
+                  "PHYSICAL",
+                  "DISCOUNT",
+                  "SHIPPING_FEE",
+                  "SALES_TAX",
+                  "DIGITAL",
+                  "GIFT_CARD",
+                  "STORE_CREDIT",
+                  "FEE",
+                  "INSURANCE"
+                ],
+                "description": "Item type"
+              },
+              "producer": {
+                "type": "string"
+              },
+              "unitPrice": {
+                "type": "object",
+                "properties": {
+                  "amount": {
+                    "type": "number",
+                    "description": "Amount in minor units (1259950 represents 12599,50 CZK) [ISO 4217](https://en.wikipedia.org/wiki/ISO_4217)"
+                  },
+                  "currency": {
+                    "type": "string",
+                    "description": "Amount currency. [ISO 4217](https://en.wikipedia.org/wiki/ISO_4217). Currenty only CZK is allowed."
+                  }
+                },
+                "required": [
+                  "amount",
+                  "currency"
+                ],
+                "description": "Price per one piece. If empty, automatically considered that `unitPrice` is `totalPrice` / `quantity`."
+              },
+              "unitVat": {
+                "type": "object",
+                "properties": {
+                  "amount": {
+                    "type": "number",
+                    "description": "Amount in minor units (188992 represents 1889,92 CZK) [ISO 4217](https://en.wikipedia.org/wiki/ISO_4217)"
+                  },
+                  "currency": {
+                    "type": "string",
+                    "description": "Amount currency. [ISO 4217](https://en.wikipedia.org/wiki/ISO_4217). Currenty only CZK is allowed."
+                  },
+                  "vatRate": {
+                    "type": "number",
+                    "description": "VAT rate as natural number (15 represents 15% rate)"
+                  }
+                },
+                "required": [
+                  "amount",
+                  "currency",
+                  "vatRate"
+                ],
+                "description": "VAT amount per one piece. If empty, automatically considered that `unitVat` is `totalVat` / `quantity`."
+              },
+              "totalPrice": {
+                "type": "object",
+                "properties": {
+                  "amount": {
+                    "type": "number",
+                    "description": "Amount in minor units (1259950 represents 12599,50 CZK) [ISO 4217](https://en.wikipedia.org/wiki/ISO_4217)"
+                  },
+                  "currency": {
+                    "type": "string",
+                    "description": "Amount currency. [ISO 4217](https://en.wikipedia.org/wiki/ISO_4217). Currenty only CZK is allowed."
+                  }
+                },
+                "required": [
+                  "amount",
+                  "currency"
+                ],
+                "description": "Total price for all pieces, VAT inclusive"
+              },
+              "totalVat": {
+                "type": "object",
+                "properties": {
+                  "amount": {
+                    "type": "number",
+                    "description": "Amount in minor units (188992 represents 1889,92 CZK) [ISO 4217](https://en.wikipedia.org/wiki/ISO_4217)"
+                  },
+                  "currency": {
+                    "type": "string",
+                    "description": "Amount currency. [ISO 4217](https://en.wikipedia.org/wiki/ISO_4217). Currenty only CZK is allowed."
+                  },
+                  "vatRate": {
+                    "type": "number",
+                    "description": "VAT rate as natural number (15 represents 15% rate)"
+                  }
+                },
+                "required": [
+                  "amount",
+                  "currency",
+                  "vatRate"
+                ],
+                "description": "Total VAT amount for all pieces"
+              },
+              "image": {
+                "type": "object",
+                "properties": {
+                  "filename": {
+                    "type": "string",
+                    "description": "File name."
+                  }
+                },
+                "oneOf": [
+                  {
+                    "properties": {
+                      "url": {
+                        "type": "string",
+                        "description": "File URL."
+                      }
+                    },
+                    "required": [
+                      "url"
+                    ]
+                  },
+                  {
+                    "properties": {
+                      "content": {
+                        "type": "string",
+                        "description": "File content (Base64 encoded, maximum size of encoded string is 500kB)"
+                      }
+                    },
+                    "required": [
+                      "content"
+                    ]
+                  }
+                ],
+                "description": "Item image"
+              },
+              "state": {
+                "type": "string",
+                "enum": [
+                  "PROCESSING",
+                  "SENT",
+                  "DELIVERED",
+                  "RETURNED",
+                  "CANCELLED"
+                ],
+                "description": "Order state."
+              }
+            },
+            "required": [
+              "code",
+              "name",
+              "totalPrice",
+              "totalVat",
+              "state"
+            ]
+          },
+          "description": "Order items"
+        },
+        "state": {
+          "type": "string",
+          "enum": [
+            "PROCESSING",
+            "SENT",
+            "DELIVERED",
+            "RETURNED",
+            "CANCELLED"
+          ],
+          "description": "Order state."
+        }
+      },
+      "required": [
+        "number",
+        "totalPrice",
+        "totalVat",
+        "items",
+        "state"
+      ],
+      "description": "Order data"
+    },
+    "type": {
+      "type": "string",
+      "enum": [
+        "INSTALLMENT"
+      ],
+      "description": "Financing type"
+    },
+    "settingsInstallment": {
+      "type": "object",
+      "properties": {
+        "preferredMonths": {
+          "type": "number",
+          "description": "Preferred number of installments (in months)"
+        },
+        "preferredInstallment": {
+          "type": "object",
+          "properties": {
+            "amount": {
+              "type": "number",
+              "description": "Amount in minor units (221900 represents 2219 CZK) [ISO 4217](https://en.wikipedia.org/wiki/ISO_4217)"
+            },
+            "currency": {
+              "type": "string",
+              "description": "Amount currency. [ISO 4217](https://en.wikipedia.org/wiki/ISO_4217). Currenty only CZK is allowed."
+            }
+          },
+          "required": [
+            "amount",
+            "currency"
+          ],
+          "description": "Preferred repayment amount"
+        },
+        "preferredDownPayment": {
+          "type": "object",
+          "properties": {
+            "amount": {
+              "type": "number",
+              "description": "Amount in minor units (12590 represents 125,90 CZK) [ISO 4217](https://en.wikipedia.org/wiki/ISO_4217)"
+            },
+            "currency": {
+              "type": "string",
+              "description": "Amount currency. [ISO 4217](https://en.wikipedia.org/wiki/ISO_4217). Currenty only CZK is allowed."
+            }
+          },
+          "required": [
+            "amount",
+            "currency"
+          ],
+          "description": "Preferred down payment amount (amount should be rounded to hundreds)"
+        },
+        "productCode": {
+          "type": "string",
+          "description": "Product code, this indicates previous calculation result"
+        },
+        "productSetCode": {
+          "type": "string",
+          "description": "Product set code, this will limit further calculations"
+        }
+      },
+      "description": "Settings for INSTALLMENT Application type."
+    },
+    "gatewayRedirectUrl": {
+      "type": "string",
+      "description": "Gateway redirect URL. Redirect user to this URL if state is `PROCESSING` and stateReason is `PROCESSING_REDIRECT_NEEDED`."
+    }
+  },
+  "required": [
+    "id",
+    "state",
+    "stateReason",
+    "order",
+    "type"
+  ]
+}

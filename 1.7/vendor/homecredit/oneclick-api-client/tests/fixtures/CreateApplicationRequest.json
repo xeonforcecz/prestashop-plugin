@@ -1,0 +1,128 @@
+{
+  "customer": {
+    "firstName": "John",
+    "lastName": "Newborn",
+    "fullName": "Ing. John Newborn, Csc.",
+    "email": "john.newborn@country.com",
+    "phone": "+420777123456",
+    "addresses": [
+      {
+        "name": "John Newborn",
+        "country": "CZ",
+        "city": "Prague",
+        "streetAddress": "Letenská",
+        "streetNumber": "22",
+        "zip": "140 00",
+        "addressType": "PERMANENT"
+      }
+    ],
+    "tin": "12333321",
+    "ipAddress": "172.10.10.1",
+    "fingerprintComponents": [
+      {
+        "key": "user_agent",
+        "value": "asdasd"
+      }
+    ],
+    "extraData": {
+      "transactionsNumber": 10,
+      "cashlessTransactionsNumber": 5,
+      "transactionsSum": {
+        "amount": 1259950,
+        "currency": "CZK"
+      },
+      "cashlessTransactionsSum": {
+        "amount": 1259950,
+        "currency": "CZK"
+      },
+      "latestTransactionDate": "2017-01-10",
+      "earliestTransactionDate": "2015-10-12",
+      "pageTotalTime": 250,
+      "pageReviewsTime": 100,
+      "cartItemsRemoved": 2,
+      "itemsViewed": 10
+    }
+  },
+  "order": {
+    "number": "AA234",
+    "variableSymbols": [
+      "123456",
+      "1234567"
+    ],
+    "totalPrice": {
+      "amount": 1259950,
+      "currency": "CZK"
+    },
+    "totalVat": [
+      {
+        "amount": 188992,
+        "currency": "CZK",
+        "vatRate": 15
+      }
+    ],
+    "addresses": [
+      {
+        "name": "John Newborn",
+        "country": "CZ",
+        "city": "Prague",
+        "streetAddress": "Letenská",
+        "streetNumber": "22",
+        "zip": "140 00",
+        "addressType": "BILLING"
+      }
+    ],
+    "deliveryType": "PERSONAL_BRANCH",
+    "reservationDate": "2017-07-15T00:00:00+02:00",
+    "items": [
+      {
+        "code": "EXC4677-1a",
+        "ean": "888462064002",
+        "name": "iPhone 6s 32GB SpaceGray",
+        "quantity": 1,
+        "type": "PHYSICAL",
+        "producer": "Apple",
+        "unitPrice": {
+          "amount": 1259950,
+          "currency": "CZK"
+        },
+        "unitVat": {
+          "amount": 188992,
+          "currency": "CZK",
+          "vatRate": 15
+        },
+        "totalPrice": {
+          "amount": 1259950,
+          "currency": "CZK"
+        },
+        "totalVat": {
+          "amount": 188992,
+          "currency": "CZK",
+          "vatRate": 15
+        },
+        "image": {
+          "filename": "iphone6s.jpg",
+          "url": "https://i.cdn.nrholding.net/32523771/2000/2000"
+        }
+      }
+    ]
+  },
+  "type": "INSTALLMENT",
+  "settingsInstallment": {
+    "preferredMonths": 6,
+    "preferredInstallment": {
+      "amount": 221900,
+      "currency": "CZK"
+    },
+    "preferredDownPayment": {
+      "amount": 0,
+      "currency": "CZK"
+    },
+    "productCode": "COCONL06",
+    "productSetCode": "COCHCONL"
+  },
+  "merchantUrls": {
+    "approvedRedirect": "https://www.youreshop.cz",
+    "rejectedRedirect": "https://www.youreshop.cz/kosik",
+    "notificationEndpoint": "https://www.youreshop.cz/order/AA234"
+  }
+}

@@ -1,0 +1,23 @@
+#hc-calc-button a {
+    text-decoration: underline;
+    margin-left: 20px;
+    font-size: 15px;
+}
+
+#hc-confirm-payment-method {
+    cursor: pointer;
+}
+
+#hc-change-payment{
+    text-decoration: underline;
+    cursor: pointer;
+}
+
+#hc-loan-overview {
+    margin-left: 5rem;
+    color: #000000;
+}
+
+#hc-select-payment {
+    background: url(../img/hc-gray-loan-logo.png) 15px 15px no-repeat #fbfbfb;
+}

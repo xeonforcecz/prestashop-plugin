@@ -1,0 +1,96 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema#",
+  "type": "object",
+  "properties": {
+    "productCode": {
+      "type": "string",
+      "description": "Installment program product code"
+    },
+    "type": {
+      "type": "string",
+      "enum": [
+        "MINIMAL",
+        "FAVOURITE",
+        "OTHER"
+      ],
+      "description": "Program type"
+    },
+    "installment": {
+      "type": "object",
+      "properties": {
+        "amount": {
+          "type": "number",
+          "description": "Amount in minor units (250000 represents 2500 CZK) [ISO 4217](https://en.wikipedia.org/wiki/ISO_4217)"
+        },
+        "currency": {
+          "type": "string",
+          "description": "Amount currency. [ISO 4217](https://en.wikipedia.org/wiki/ISO_4217). Currenty only CZK is allowed."
+        }
+      },
+      "required": [
+        "amount",
+        "currency"
+      ],
+      "description": "monthly installment amount"
+    },
+    "numberOfInstallments": {
+      "type": "number",
+      "description": "installment count"
+    },
+    "detail": {
+      "type": "object",
+      "properties": {
+        "installmentDay": {
+          "type": "number",
+          "description": "Installment date (day in month)"
+        },
+        "installmentFirstDate": {
+          "type": "string",
+          "description": "Date of the first installment"
+        },
+        "installmentLastDate": {
+          "type": "string",
+          "description": "Date of the last installment"
+        },
+        "annualInterestRate": {
+          "type": "number",
+          "description": "Annual interest rate"
+        },
+        "predictedProvisionDate": {
+          "type": "string",
+          "description": "Predicted provision date"
+        },
+        "paidBack": {
+          "type": "object",
+          "properties": {
+            "amount": {
+              "type": "number",
+              "description": "Amount in minor units (250000 represents 2500 CZK) [ISO 4217](https://en.wikipedia.org/wiki/ISO_4217)"
+            },
+            "currency": {
+              "type": "string",
+              "description": "Amount currency. [ISO 4217](https://en.wikipedia.org/wiki/ISO_4217). Currenty only CZK is allowed."
+            }
+          },
+          "required": [
+            "amount",
+            "currency"
+          ],
+          "description": "Total amount paid by customer"
+        },
+        "rpsn": {
+          "type": "number",
+          "description": "RPSN"
+        },
+        "legalline": {
+          "type": "string",
+          "description": "Text interpretation of the offer"
+        }
+      },
+      "description": "Calculation detailed information."
+    }
+  },
+  "required": [
+    "productCode"
+  ]
+}

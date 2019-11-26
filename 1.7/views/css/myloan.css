@@ -1,0 +1,21 @@
+#hc-calc-button {
+    margin-top: 5px;
+}
+
+#hc-calc-button a {
+    text-decoration: underline;
+    font-size: 15px;
+}
+
+#hc-confirm-payment-method {
+    cursor: pointer;
+}
+
+#hc-loan-overview {
+    margin-left: 5rem;
+    color: #000000;
+}
+
+#hc-select-payment {
+    margin-left:40px;
+}

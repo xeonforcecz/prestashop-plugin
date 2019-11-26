@@ -1,0 +1,22 @@
+{
+  "productCode": "COCONL06",
+  "type": "FAVOURITE",
+  "installment": {
+    "amount": 221900,
+    "currency": "CZK"
+  },
+  "numberOfInstallments": 6,
+  "detail": {
+    "installmentDay": 20,
+    "installmentFirstDate": "2018-09-20",
+    "installmentLastDate": "2019-02-20",
+    "annualInterestRate": 0.1743,
+    "predictedProvisionDate": "2018-08-10",
+    "paidBack": {
+      "amount": 1331400,
+      "currency": "CZK"
+    },
+    "rpsn": 0.19,
+    "legalline": "\"Každou žádost posuzujeme individuálně a uvedené hodnoty jsme vám spočítali na míru.\\nPlatí pro čerpání k 10.08.2018, datum první splátky je k 20.09.2018 a datum dalších splátek vždy k 20. dni v měsíci, počínaje 20.10.2018 a při lhůtě splatnosti 20.02.2019.\""
+  }
+}

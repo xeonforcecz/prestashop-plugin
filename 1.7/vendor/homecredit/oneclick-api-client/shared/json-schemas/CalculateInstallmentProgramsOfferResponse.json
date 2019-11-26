@@ -1,0 +1,56 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema#",
+  "type": "object",
+  "properties": {
+    "installmentPrograms": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "productCode": {
+            "type": "string",
+            "description": "Installment program product code"
+          },
+          "type": {
+            "type": "string",
+            "enum": [
+              "MINIMAL",
+              "FAVOURITE",
+              "OTHER"
+            ],
+            "description": "Program type"
+          },
+          "installment": {
+            "type": "object",
+            "properties": {
+              "amount": {
+                "type": "number",
+                "description": "Amount in minor units (250000 represents 2500 CZK) [ISO 4217](https://en.wikipedia.org/wiki/ISO_4217)"
+              },
+              "currency": {
+                "type": "string",
+                "description": "Amount currency. [ISO 4217](https://en.wikipedia.org/wiki/ISO_4217). Currenty only CZK is allowed."
+              }
+            },
+            "required": [
+              "amount",
+              "currency"
+            ],
+            "description": "monthly installment amount"
+          },
+          "numberOfInstallments": {
+            "type": "number",
+            "description": "installment count"
+          }
+        },
+        "required": [
+          "productCode"
+        ]
+      },
+      "description": "Array with installment programs offer"
+    }
+  },
+  "required": [
+    "installmentPrograms"
+  ]
+}

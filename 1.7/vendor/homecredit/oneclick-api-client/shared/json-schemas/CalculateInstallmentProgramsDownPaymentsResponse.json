@@ -1,0 +1,60 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema#",
+  "type": "object",
+  "properties": {
+    "minimum": {
+      "type": "object",
+      "properties": {
+        "amount": {
+          "type": "number",
+          "description": "Amount in minor units [ISO 4217](https://en.wikipedia.org/wiki/ISO_4217)"
+        },
+        "currency": {
+          "type": "string",
+          "description": "Amount currency. [ISO 4217](https://en.wikipedia.org/wiki/ISO_4217). Currenty only CZK is allowed."
+        }
+      },
+      "required": [
+        "amount",
+        "currency"
+      ],
+      "description": "The lowest down payment amount, e.g. 0 (0 Kč)"
+    },
+    "maximum": {
+      "type": "object",
+      "properties": {
+        "amount": {
+          "type": "number",
+          "description": "Amount in minor units (250000 represents 2500 CZK) [ISO 4217](https://en.wikipedia.org/wiki/ISO_4217)"
+        },
+        "currency": {
+          "type": "string",
+          "description": "Amount currency. [ISO 4217](https://en.wikipedia.org/wiki/ISO_4217). Currenty only CZK is allowed."
+        }
+      },
+      "required": [
+        "amount",
+        "currency"
+      ],
+      "description": "Maximum down payment amount, e.g. 2500 (2 500 Kč)"
+    },
+    "step": {
+      "type": "object",
+      "properties": {
+        "amount": {
+          "type": "number",
+          "description": "Amount in minor units (50000 represents 500 CZK) [ISO 4217](https://en.wikipedia.org/wiki/ISO_4217)"
+        },
+        "currency": {
+          "type": "string",
+          "description": "Amount currency. [ISO 4217](https://en.wikipedia.org/wiki/ISO_4217). Currenty only CZK is allowed."
+        }
+      },
+      "required": [
+        "amount",
+        "currency"
+      ],
+      "description": "Size of one step between the lowest and maximum down payment amounts, e.g. 500 (500 Kč). Available down payments could be (min 0, max 2500): 0, 500, 1000, 1500, 2000, 2500"
+    }
+  }
+}

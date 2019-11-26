@@ -1,0 +1,70 @@
+{
+  "number": "AA234",
+  "variableSymbols": [
+    "123456",
+    "1234567"
+  ],
+  "totalPrice": {
+    "amount": 1259950,
+    "currency": "CZK"
+  },
+  "totalVat": [
+    {
+      "amount": 188992,
+      "currency": "CZK",
+      "vatRate": 15
+    }
+  ],
+  "addresses": [
+    {
+      "name": "John Newborn",
+      "country": "CZ",
+      "city": "Prague",
+      "streetAddress": "Letenská",
+      "streetNumber": "22",
+      "zip": "140 00",
+      "addressType": "DELIVERY"
+    }
+  ],
+  "deliveryType": "PERSONAL_BRANCH",
+  "reservationDate": "2017-07-15T00:00:00+02:00",
+  "items": [
+    {
+      "code": "EXC4677-1a",
+      "ean": "888462064002",
+      "name": "iPhone 6s 32GB SpaceGray",
+      "quantity": 1,
+      "type": "PHYSICAL",
+      "producer": "Apple",
+      "unitPrice": {
+        "amount": 1259950,
+        "currency": "CZK"
+      },
+      "unitVat": {
+        "amount": 188992,
+        "currency": "CZK",
+        "vatRate": 15
+      },
+      "totalPrice": {
+        "amount": 1259950,
+        "currency": "CZK"
+      },
+      "totalVat": {
+        "amount": 188992,
+        "currency": "CZK",
+        "vatRate": 15
+      },
+      "image": {
+        "filename": "iphone6s.jpg",
+        "url": "https://i.cdn.nrholding.net/32523771/2000/2000"
+      },
+      "state": "PROCESSING"
+    }
+  ],
+  "state": "PROCESSING",
+  "applicationInfo": {
+    "id": "01-11200a0ee1",
+    "state": "PROCESSING",
+    "stateReason": "PROCESSING_REDIRECT_NEEDED"
+  }
+}

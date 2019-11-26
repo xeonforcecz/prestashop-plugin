@@ -1,0 +1,50 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema#",
+  "type": "object",
+  "properties": {
+    "productCode": {
+      "type": "string",
+      "description": "Product code, this indicates previous calculation result"
+    },
+    "price": {
+      "type": "object",
+      "properties": {
+        "amount": {
+          "type": "number",
+          "description": "Amount in minor units (1259950 represents 12599,50 CZK) [ISO 4217](https://en.wikipedia.org/wiki/ISO_4217)"
+        },
+        "currency": {
+          "type": "string",
+          "description": "Amount currency. [ISO 4217](https://en.wikipedia.org/wiki/ISO_4217). Currenty only CZK is allowed."
+        }
+      },
+      "required": [
+        "amount",
+        "currency"
+      ],
+      "description": "Goods price"
+    },
+    "downPayment": {
+      "type": "object",
+      "properties": {
+        "amount": {
+          "type": "number",
+          "description": "Amount in minor units [ISO 4217](https://en.wikipedia.org/wiki/ISO_4217)"
+        },
+        "currency": {
+          "type": "string",
+          "description": "Amount currency. [ISO 4217](https://en.wikipedia.org/wiki/ISO_4217). Currenty only CZK is allowed."
+        }
+      },
+      "required": [
+        "amount",
+        "currency"
+      ],
+      "description": "Down payment amount (default is 0, amount should be rounded to hundreds)"
+    }
+  },
+  "required": [
+    "productCode",
+    "price"
+  ]
+}

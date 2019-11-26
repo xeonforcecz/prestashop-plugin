@@ -1,0 +1,35 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema#",
+  "type": "object",
+  "properties": {
+    "order": {
+      "type": "object",
+      "properties": {
+        "number": {
+          "type": "string",
+          "description": "Order number (internal for e-shop)"
+        },
+        "variableSymbols": {
+          "type": "array",
+          "items": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "string"
+            }
+          ],
+          "description": "Variable symbols (internal for e-shop)"
+        }
+      },
+      "description": "Changed order data."
+    },
+    "reason": {
+      "type": "string",
+      "description": "Reason of change."
+    }
+  },
+  "required": [
+    "order"
+  ]
+}

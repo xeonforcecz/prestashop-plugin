@@ -1,0 +1,37 @@
+{
+	"name": "homecredit/oneclick-api-client",
+	"type": "library",
+	"description": "PHP client for OneClick API",
+	"require": {
+		"php": "~5.6",
+		"guzzlehttp/guzzle": "^6.3",
+		"ext-json": "^1.2",
+		"respect/validation": "^1.1",
+		"symfony/options-resolver": "^3.4",
+		"martinstarecek/schematic": "^0.9.0",
+		"psr/log": "^1.0",
+		"nette/utils": "^2.5"
+	},
+	"autoload": {
+		"classmap": [
+			"src/"
+		]
+	},
+	"scripts": {
+		"code-style": [
+			"phpcs --extensions=php --standard=./ruleset.xml --encoding=utf-8 -sp src/HomeCredit tests/"
+		],
+		"code-style-fixer": [
+			"phpcbf --extensions=php --standard=./ruleset.xml --encoding=utf-8 -sp src/HomeCredit tests/"
+		],
+		"test": "phpunit tests/",
+		"test-unit": "phpunit tests/ --group Unit",
+		"test-int": "phpunit tests/ --group Int"
+	},
+	"require-dev": {
+		"consistence/coding-standard": "^0.13.0",
+		"slevomat/coding-standard": "^1.1",
+		"phpunit/phpunit": "^5.7",
+		"monolog/monolog": "^1.23"
+	}
+}

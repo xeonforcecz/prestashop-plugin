@@ -1,0 +1,13 @@
+{
+  "installmentPrograms": [
+    {
+      "productCode": "COCONL06",
+      "type": "FAVOURITE",
+      "installment": {
+        "amount": 221900,
+        "currency": "CZK"
+      },
+      "numberOfInstallments": 6
+    }
+  ]
+}
