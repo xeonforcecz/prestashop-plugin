@@ -45,11 +45,19 @@ class RequestAPI extends AuthAPI
     /**
      *
      */
-    const END_POINT_CALCULATOR_PUBLIC_CZ = "https://kalkulacka.train.hciapp.net/";
+    const END_POINT_CALCULATOR_PUBLIC_CZ = "https://kalkulacka.homecredit.cz/";
     /**
      *
      */
-    const END_POINT_CALCULATOR_PUBLIC_SK = "https://kalkulacka-sk.train.hciapp.net/";
+    const END_POINT_CALCULATOR_PUBLIC_TEST_CZ = "https://kalkulacka.train.hciapp.net/";
+    /**
+     *
+     */
+    const END_POINT_CALCULATOR_PUBLIC_SK = "https://kalkulacka.homecredit.sk/";
+    /**
+     *
+     */
+    const END_POINT_CALCULATOR_PUBLIC_TEST_SK = "https://kalkulacka-sk.train.hciapp.net/";
 
     /**
      *

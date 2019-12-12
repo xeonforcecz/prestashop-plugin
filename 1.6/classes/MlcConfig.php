@@ -304,11 +304,13 @@ class MlcConfig extends Configuration
     {
         switch (Tools::strtoupper($countryIsoCode)) {
             case self::CZ_VERSION:
-            case self::CZ_TEST_VERSION:
                 return \MyLoan\HomeCredit\RequestAPI::END_POINT_CALCULATOR_PUBLIC_CZ;
+            case self::CZ_TEST_VERSION:
+                return \MyLoan\HomeCredit\RequestAPI::END_POINT_CALCULATOR_PUBLIC_TEST_CZ;
             case self::SK_VERSION:
-            case self::SK_TEST_VERSION:
                 return \MyLoan\HomeCredit\RequestAPI::END_POINT_CALCULATOR_PUBLIC_SK;
+            case self::SK_TEST_VERSION:
+                return \MyLoan\HomeCredit\RequestAPI::END_POINT_CALCULATOR_PUBLIC_TEST_SK;
         }
     }
 
