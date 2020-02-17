@@ -218,14 +218,21 @@ class RequestAPI extends AuthAPI
           'CONTACT'
         );
 
+        $phone = $invoiceAddress->phone;
+
+        // If phone is empty, try mobile
+        if(empty($invoiceAddress->phone)) {
+            $phone = $invoiceAddress->phone_mobile;
+        }
+
         return array (
-          'firstName' => $customer->firstname,
-          'lastName' =>  $customer->lastname,
-          'email' => $customer->email,
-          'phone' => trim($invoiceAddress->phone),
-          'addresses' => [$address],
-          'tin' => $invoiceAddress->vat_number,
-          'ipAddress' => \Tools::getRemoteAddr()
+            'firstName' => $customer->firstname,
+            'lastName' =>  $customer->lastname,
+            'email' => $customer->email,
+            'phone' => trim($phone),
+            'addresses' => [$address],
+            'tin' => $invoiceAddress->vat_number,
+            'ipAddress' => \Tools::getRemoteAddr()
         );
     }
 
