@@ -24,17 +24,38 @@ class ResponseAPI
         $orderReference = \Tools::getValue("orderNumber");
         $check_sum = \Tools::getValue("checkSum");
         $state_reason = \Tools::getValue("stateReason");
+
         if (!$orderReference || !$check_sum || !$state_reason) {
-            throw new PrestaShopModuleException("HomeCredit API - empty required parameter.");
+
+            $array = json_decode(file_get_contents("php://input"), true);
+
+            if (
+                !is_array($array) ||
+                !@array_key_exists("orderReference", $array) ||
+                !@array_key_exists("checkSum", $array) ||
+                !@array_key_exists("stateReason", $array)
+            ) {
+                throw new PrestaShopModuleException("HomeCredit API - empty required parameter.");
+            } else {
+                $orderReference = $array["orderReference"];
+                $check_sum = $array["checkSum"];
+                $state_reason = $array["stateReason"];
+            }
         }
+
         $secretKey = MlcConfig::get(MlcConfig::API_SECRETCODE);
         $data = $orderReference.":".$state_reason;
 
         if (\Tools::strtoupper(hash_hmac('sha512', $data, $secretKey)) != $check_sum) {
-            throw new PrestaShopModuleException("Wrong checkSum.");
+            throw new \PrestaShopModuleException("HomeCredit API - Wrong checkSum.");
         }
 
         $orderCollection = Order::getByReference($orderReference);
+
+        if($orderCollection->getFirst() == false){
+            throw new \PrestaShopModuleException("HomeCredit API - Unknown order.");
+        }
+
         $order_id = $orderCollection->getFirst()->id;
 
         Loan::updateLoan($order_id);
