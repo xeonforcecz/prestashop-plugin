@@ -1,9 +1,16 @@
 <?php
 /**
-*  @author HN Consulting Brno s.r.o
-*  @copyright  2019-*
-*  @license    http://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
-**/
+ * @author     HN Consulting Brno s.r.o
+ * @copyright  2019-*
+ * @license    http://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
+ **/
+
+use MyLoan\HomeCredit\EndPointManager;
+use MyLoan\HomeCredit\OrderStateManager;
+use MyLoan\HomeCredit\OrderStates\AbstractState;
+use MyLoan\HomeCredit\OrderStates\ReadyToDeliveredState;
+use MyLoan\HomeCredit\OrderStates\ReadyToShippedState;
+use MyLoan\HomeCredit\OrderStates\UnclassifiedState;
 
 /**
  * Class MlcConfig
@@ -59,6 +66,10 @@ class MlcConfig extends Configuration
      *
      */
     const API_CALC_KEY = self::MODULE_PREFIX . "API_CALC_KEY";
+    /**
+     * Nainstalovaná verze modulu
+     */
+    const MODULE_VERSION = self::MODULE_PREFIX . "VERSION";
 
     /**
      *
@@ -76,6 +87,9 @@ class MlcConfig extends Configuration
      *
      */
     const SK_TEST_VERSION = "SK_TEST";
+
+    const OPTION_ID_GENERATE = -2;
+    const OPTION_ID_UNCLASSIFIED = -1;
 
     /**
      * Metoda která naisntaluje vše potøebné
@@ -96,7 +110,12 @@ class MlcConfig extends Configuration
      */
     public static function installDefault()
     {
-        $default_data = self::getConfigArray();
+        $manager = new OrderStateManager();
+        $default_data = self::getConfigArray($manager);
+
+        foreach ($manager->getIdStates(false) as $id) {
+            $default_data[$id] = self::OPTION_ID_GENERATE;
+        }
         $default_data[self::API_USER] = "";
         $default_data[self::API_PASSWORD] = "";
         $default_data[self::API_SECRETCODE] = "";
@@ -105,23 +124,16 @@ class MlcConfig extends Configuration
         $default_data[self::API_CALC_KEY] = "calculator_test_key";
         $default_data[self::EXPORT_METHOD] = "0";
 
-        switch (\Tools::strtoupper(\MyLoan\Tools::getTopGenericDomainFromUrl($_SERVER['SERVER_NAME']))) {
-            case self::CZ_VERSION:
-                $default_data[self::API_COUNTRY] = "CZ";
-                $default_data[self::API_URL] = \MyLoan\HomeCredit\RequestAPI::END_POINT_CZ;
-                $default_data[self::API_CALC_URL] = \MyLoan\HomeCredit\RequestAPI::END_POINT_CALCULATOR_PUBLIC_CZ;
-                break;
-            case self::SK_VERSION:
-                $default_data[self::API_COUNTRY] = "SK";
-                $default_data[self::API_URL] = \MyLoan\HomeCredit\RequestAPI::END_POINT_SK;
-                $default_data[self::API_CALC_URL] = \MyLoan\HomeCredit\RequestAPI::END_POINT_CALCULATOR_PUBLIC_SK;
-                break;
-            default:
-                $default_data[self::API_COUNTRY] = "CZ";
-                $default_data[self::API_URL] = \MyLoan\HomeCredit\RequestAPI::END_POINT_CZ;
-                $default_data[self::API_CALC_URL] = \MyLoan\HomeCredit\RequestAPI::END_POINT_CALCULATOR_PUBLIC_CZ;
-                break;
+        $version = self::CZ_VERSION;
+        $manager = EndPointManager::getInstance();
+        if (\Tools::strtoupper(\MyLoan\Tools::getTopGenericDomainFromUrl($_SERVER['SERVER_NAME'])) === self::SK_VERSION) {
+            $version = self::SK_VERSION;
         }
+
+        $default_data[self::API_COUNTRY] = $version;
+        $default_data[self::API_URL] = $manager->getApiUrl($version);
+        $default_data[self::API_CALC_URL] = $manager->getApiCalcPublicUrl($version);
+
 
         return self::updateValues($default_data);
     }
@@ -184,11 +196,11 @@ class MlcConfig extends Configuration
             case "DELIVERED":
                 \Db::getInstance()->Execute(
                   "UPDATE `" . _DB_PREFIX_ . "order_state` SET `deleted` = '1' WHERE `" . _DB_PREFIX_ . "order_state`.`id_order_state` = '"
-                  .MlcConfig::get("HC_READY_SHIPPED")."';"
+                  .MlcConfig::get(ReadyToShippedState::ID)."';"
                 );
                 \Db::getInstance()->Execute(
                   "UPDATE `" . _DB_PREFIX_ . "order_state` SET `deleted` = '0' WHERE `" . _DB_PREFIX_ . "order_state`.`id_order_state` = '"
-                  .MlcConfig::get("HC_READY_DELIVERED")."';"
+                  .MlcConfig::get(ReadyToDeliveredState::ID)."';"
                 );
                 break;
 
@@ -197,11 +209,11 @@ class MlcConfig extends Configuration
             case "SHIPPED":
                 \Db::getInstance()->Execute(
                   "UPDATE `" . _DB_PREFIX_ . "order_state` SET `deleted` = '0' WHERE `" . _DB_PREFIX_ . "order_state`.`id_order_state` = '"
-                  .MlcConfig::get("HC_READY_SHIPPED")."';"
+                  .MlcConfig::get(ReadyToShippedState::ID)."';"
                 );
                 \Db::getInstance()->Execute(
                   "UPDATE `" . _DB_PREFIX_ . "order_state` SET `deleted` = '1' WHERE `" . _DB_PREFIX_ . "order_state`.`id_order_state` = '"
-                  .MlcConfig::get("HC_READY_DELIVERED")."';"
+                  .MlcConfig::get(ReadyToDeliveredState::ID)."';"
                 );
             break;
         }
@@ -249,19 +261,27 @@ class MlcConfig extends Configuration
           self::EXPORT_METHOD => "isBool"
         ];
 
+        $manager = new OrderStateManager();
+        foreach ($manager->getIdStates(false) as $id) {
+            $mlcValidate[$id] = "isString";
+        }
+
         $mlcData = \MyLoan\Validate::getDataAndValidate($mlcValidate);
         if (!$mlcData) {
             return $module->displayError($module->l('Please make sure you filled all fields in correct format.'));
         }
 
+        $mlcData = self::generateOrderMapping($manager, $mlcData);
+
         if (!self::requiredFields($mlcData)) {
             return $module->displayError($module->l('Please fill in all the required fields.'));
         }
 
-        $mlcData[self::API_URL] = self::getApiUrl($mlcData[self::API_COUNTRY]);
+        $endPointManager = EndPointManager::getInstance();
+        $mlcData[self::API_URL] = $endPointManager->getApiUrl($mlcData[self::API_COUNTRY]);
         $mlcData[self::API_CALC_URL] = $mlcData[self::API_CERTIFIED] ?
-          self::getApiCalcCertifiedUrl($mlcData[self::API_COUNTRY]) :
-          self::getApiCalcPublicUrl($mlcData[self::API_COUNTRY]);
+          $endPointManager->getApiCalcCertifiedUrl($mlcData[self::API_COUNTRY]) :
+          $endPointManager->getApiCalcPublicUrl($mlcData[self::API_COUNTRY]);
 
         MlcConfig::setExpeditionType($mlcData[self::EXPORT_METHOD]);
 
@@ -286,7 +306,7 @@ class MlcConfig extends Configuration
             return false;
         }*/
 
-        $mlcData = self::getConfigArray();
+        $mlcData = self::getConfigArray(new OrderStateManager);
         foreach ($mlcData as $key => $config) {
             // Unset because of PS validator
             unset($config);
@@ -300,79 +320,31 @@ class MlcConfig extends Configuration
 
     /**
      * Získání nastavení
+     *
+     * @param OrderStateManager $manager
      * @return array
      */
-    public static function getConfigArray()
+    public static function getConfigArray(OrderStateManager $manager = null)
     {
-        return [
-          self::API_COUNTRY => self::get(self::API_COUNTRY),
-          self::API_URL => self::get(self::API_URL),
-          self::API_CALC_URL => self::get(self::API_CALC_URL),
-          self::API_USER => self::get(self::API_USER),
-          self::API_PASSWORD => self::get(self::API_PASSWORD),
-          self::API_SECRETCODE => self::get(self::API_SECRETCODE),
-          self::API_CERTIFIED => self::get(self::API_CERTIFIED),
-          self::API_PRODUCT_CODE => self::get(self::API_PRODUCT_CODE),
-          self::API_CALC_KEY => self::get(self::API_CALC_KEY),
-          self::EXPORT_METHOD => self::get(self::EXPORT_METHOD),
+        $config = [
+            self::API_COUNTRY => self::get(self::API_COUNTRY),
+            self::API_URL => self::get(self::API_URL),
+            self::API_CALC_URL => self::get(self::API_CALC_URL),
+            self::API_USER => self::get(self::API_USER),
+            self::API_PASSWORD => self::get(self::API_PASSWORD),
+            self::API_SECRETCODE => self::get(self::API_SECRETCODE),
+            self::API_CERTIFIED => self::get(self::API_CERTIFIED),
+            self::API_PRODUCT_CODE => self::get(self::API_PRODUCT_CODE),
+            self::API_CALC_KEY => self::get(self::API_CALC_KEY),
+            self::EXPORT_METHOD => self::get(self::EXPORT_METHOD)
         ];
-    }
 
-    /**
-     * Vrátí url pro dané nastavení
-     * @param $countryIsoCode
-     * @return string
-     */
-    public static function getApiUrl($countryIsoCode)
-    {
-        switch (Tools::strtoupper($countryIsoCode)) {
-            case self::CZ_VERSION:
-                return \MyLoan\HomeCredit\RequestAPI::END_POINT_CZ;
-            case self::SK_VERSION:
-                return \MyLoan\HomeCredit\RequestAPI::END_POINT_SK;
-            case self::CZ_TEST_VERSION:
-                return \MyLoan\HomeCredit\RequestAPI::END_POINT_CZ_TEST;
-            case self::SK_TEST_VERSION:
-                return \MyLoan\HomeCredit\RequestAPI::END_POINT_SK_TEST;
+        if ($manager !== null) {
+            foreach ($manager->getIdStates(false) as $idState) {
+                $config[$idState] = self::getMappingOrderState($idState);
+            }
         }
-    }
-
-    /**
-     * Vrácení url pro kalkulaèku
-     * @param $countryIsoCode
-     * @return string
-     */
-    public static function getApiCalcPublicUrl($countryIsoCode)
-    {
-        switch (Tools::strtoupper($countryIsoCode)) {
-            case self::CZ_VERSION:
-                return \MyLoan\HomeCredit\RequestAPI::END_POINT_CALCULATOR_PUBLIC_CZ;
-            case self::CZ_TEST_VERSION:
-                return \MyLoan\HomeCredit\RequestAPI::END_POINT_CALCULATOR_PUBLIC_TEST_CZ;
-            case self::SK_VERSION:
-                return \MyLoan\HomeCredit\RequestAPI::END_POINT_CALCULATOR_PUBLIC_SK;
-            case self::SK_TEST_VERSION:
-                return \MyLoan\HomeCredit\RequestAPI::END_POINT_CALCULATOR_PUBLIC_TEST_SK;
-        }
-    }
-
-    /**
-     * Vrátí url pro certifikovaného prodejce
-     * @param $countryIsoCode
-     * @return string
-     */
-    public static function getApiCalcCertifiedUrl($countryIsoCode)
-    {
-        switch (Tools::strtoupper($countryIsoCode)) {
-            case self::CZ_VERSION:
-                return \MyLoan\HomeCredit\RequestAPI::END_POINT_CALCULATOR_CZ;
-            case self::SK_VERSION:
-                return \MyLoan\HomeCredit\RequestAPI::END_POINT_CALCULATOR_SK;
-            case self::CZ_TEST_VERSION:
-                return \MyLoan\HomeCredit\RequestAPI::END_POINT_CALCULATOR_CZ_TEST;
-            case self::SK_TEST_VERSION:
-                return \MyLoan\HomeCredit\RequestAPI::END_POINT_CALCULATOR_SK_TEST;
-        }
+        return $config;
     }
 
     /**
@@ -381,106 +353,19 @@ class MlcConfig extends Configuration
     public static function renderForm()
     {
         $module = Module::getInstanceByName(self::MODULE_NAME);
+        $currentLanguage = Context::getContext()->language;
+        $orderStateManager = new OrderStateManager;
 
         // Init Fields form array
         $fields_form = [];
         $fields_form[0]['form'] = [
-          'legend' => [
-            'title' => $module->l('Home Credit MyLoan configuration'),
-          ],
-
-          'input' => [
-            [
-              'type' => 'select',
-              'label' => $module->l('Country'),
-              'name' => self::API_COUNTRY,
-              'required' => true,
-              'options' => [
-                'query' => [
-                  ['id' => self::CZ_VERSION, 'name' => $module->l(self::CZ_VERSION)],
-                  ['id' => self::SK_VERSION, 'name' => $module->l(self::SK_VERSION)],
-                  ['id' => self::CZ_TEST_VERSION, 'name' => $module->l(self::CZ_TEST_VERSION)],
-                  ['id' => self::SK_TEST_VERSION, 'name' => $module->l(self::SK_TEST_VERSION)],
-                ],
-                'id' => 'id',
-                'name' => 'name',
-              ],
+            'legend' => [
+                'title' => $module->l('Home Credit MyLoan configuration'),
             ],
-            [
-              'type' => 'text',
-              'label' => $module->l('Username'),
-              'name' => self::API_USER,
-              'size' => 20,
-              'required' => true
-            ],
-            [
-              'type' => 'password',
-              'label' => $module->l('Password'),
-              'name' => self::API_PASSWORD,
-              'size' => 64,
-              'required' => true,
-            ],
-            [
-              'type' => 'password',
-              'label' => $module->l('Secret code'),
-              'name' => self::API_SECRETCODE,
-              'size' => 64,
-              'required' => true,
-            ],
-            [
-              'type' => 'text',
-              'label' => $module->l('Product code'),
-              'name' => self::API_PRODUCT_CODE,
-              'size' => 20,
-              'required' => true
-            ],
-            [
-              'type' => 'text',
-              'label' => $module->l('Calculator API key'),
-              'name' => self::API_CALC_KEY,
-              'size' => 20,
-              'required' => true
-            ],
-            [
-              'type' => 'switch',
-              'label' => $module->l('Are you certified Home Credit partner?'),
-              'name' => self::API_CERTIFIED,
-              'required' => true,
-              'values' => [
-                [
-                  'id' => 'certified_1',
-                  'value' => '1',
-                  'label' => $module->l('Yes'),
-                ],
-                [
-                  'id' => 'certified_0',
-                  'value' => '0',
-                  'label' => $module->l('No'),
-                ],
-              ],
-            ],
-            [
-              'type' => 'switch',
-              'label' => $module->l('Inform Home Credit when shipped? (Else when delivered.)', __CLASS__),
-              'name' => self::EXPORT_METHOD,
-              'required' => true,
-              'values' => [
-                [
-                  'id' => 'shipped_1',
-                  'value' => '1',
-                  'label' => $module->l('Yes'),
-                ],
-                [
-                  'id' => 'shipped_0',
-                  'value' => '0',
-                  'label' => $module->l('No'),
-                ],
-              ],
-            ],
-          ],
-          'submit' => [
-            'title' => $module->l('Save'),
-          ]
+            'input' => self::generateInputs($orderStateManager, $module, $currentLanguage),
+            'submit' => [
+                'title' => $module->l('Save'),
+            ]
         ];
 
         $helper = new HelperForm();
@@ -492,8 +377,7 @@ class MlcConfig extends Configuration
         $helper->currentIndex = AdminController::$currentIndex . '&configure=' . $module->name;
 
         // Language
-        $language = new Language((int)Configuration::get('PS_LANG_DEFAULT'));
-        $helper->default_form_language = $language->id;
+        $helper->default_form_language = $currentLanguage->id;
         $helper->allow_employee_form_lang = Configuration::get('PS_BO_ALLOW_EMPLOYEE_FORM_LANG') ?
           Configuration::get('PS_BO_ALLOW_EMPLOYEE_FORM_LANG') : 0;
 
@@ -504,7 +388,7 @@ class MlcConfig extends Configuration
         $helper->submit_action = 'submit' . $module->name;
 
         // Load current value
-        $helper->fields_value = self::getConfigArray();
+        $helper->fields_value = self::getConfigArray($orderStateManager);
 
         return $helper->generateForm($fields_form);
     }
@@ -555,7 +439,7 @@ class MlcConfig extends Configuration
      */
     public static function isModuleConfigured()
     {
-        $mlcData = self::getConfigArray();
+        $mlcData = self::getConfigArray(new OrderStateManager);
         return self::requiredFields($mlcData);
     }
 
@@ -573,5 +457,210 @@ class MlcConfig extends Configuration
         }
 
         return true;
+    }
+
+    private static function generateOrderMapping(OrderStateManager $manager, $data)
+    {
+        $isStateUnclassifiedGenerated = self::isOrderStateGenerated(UnclassifiedState::ID);
+        foreach ($manager->getStates(false) as $state) {
+            switch ((int)$data[$state->getId()]) {
+                case self::OPTION_ID_UNCLASSIFIED:
+                    if (!$isStateUnclassifiedGenerated) {
+                        $id = self::generateNewOrderState($manager->getState(UnclassifiedState::ID));
+                        $isStateUnclassifiedGenerated = true;
+                    } else {
+                        $id = self::getMappingOrderState(UnclassifiedState::ID);
+                    }
+                    self::setMappingOrderState($state->getId(), $id);
+                    break;
+                case self::OPTION_ID_GENERATE:
+                    if (!self::isOrderStateGenerated($state->getId())) {
+                        $id = self::generateNewOrderState($state);
+                    } else {
+                        $id = self::getMappingOrderState($state->getId());
+                    }
+                    self::setMappingOrderState($state->getId(), $id);
+                    break;
+                default:
+                    self::setMappingOrderState($state->getId(), (int)$data[$state->getId()]);
+                    break;
+            }
+            unset($data[$state->getId()]);
+        }
+
+        return $data;
+    }
+
+    public static function generateNewOrderState(AbstractState $state)
+    {
+        $orderState = $state->toOrder();
+        $orderState->add();
+        $id = (int)$orderState->id;
+        self::updateValue($state->getId(), $id);
+        self::updateValue(self::getIdOfOrderStateGenerated($state->getId()), 1);
+        return $id;
+    }
+
+    public static function getIdOfOrderStateGenerated($id)
+    {
+        return $id . '_GENERATED';
+    }
+
+    public static function getIdOfOrderStateMapping($id)
+    {
+        return $id . '_MAPPING';
+    }
+
+    public static function getMappingOrderState($id)
+    {
+        return (int)self::get(self::getIdOfOrderStateMapping($id));
+    }
+
+    private static function setMappingOrderState($id, $value)
+    {
+        self::updateValue(self::getIdOfOrderStateMapping($id), $value);
+    }
+
+    public static function isOrderStateGenerated($id)
+    {
+        return self::hasKey(self::getIdOfOrderStateGenerated($id)) && (bool)self::get($id);
+    }
+
+    /**
+     * @param OrderStateManager $manager
+     * @param Module            $module
+     * @param Language          $language
+     * @return array
+     */
+    private static function generateInputs(OrderStateManager $manager, Module $module, Language $language)
+    {
+        $inputsToPrepend = [
+            [
+                'type' => 'select',
+                'label' => $module->l('Country'),
+                'name' => self::API_COUNTRY,
+                'required' => true,
+                'options' => [
+                    'query' => array_map(function($id) use($module) {
+                        return ['id' => $id, 'name' => $module->l($id)];
+                    }, EndPointManager::getInstance()->getVersionList()),
+                    'id' => 'id',
+                    'name' => 'name',
+                ],
+            ],
+            [
+                'type' => 'text',
+                'label' => $module->l('Username'),
+                'name' => self::API_USER,
+                'size' => 20,
+                'required' => true
+            ],
+            [
+                'type' => 'password',
+                'label' => $module->l('Password'),
+                'name' => self::API_PASSWORD,
+                'size' => 64,
+                'required' => true,
+            ],
+            [
+                'type' => 'password',
+                'label' => $module->l('Secret code'),
+                'name' => self::API_SECRETCODE,
+                'size' => 64,
+                'required' => true,
+            ],
+            [
+                'type' => 'text',
+                'label' => $module->l('Product code'),
+                'name' => self::API_PRODUCT_CODE,
+                'size' => 20,
+                'required' => true
+            ],
+            [
+                'type' => 'text',
+                'label' => $module->l('Calculator API key'),
+                'name' => self::API_CALC_KEY,
+                'size' => 20,
+                'required' => true
+            ]
+        ];
+        $inputsToAppend = [
+            [
+                'type' => 'switch',
+                'label' => $module->l('Are you certified Home Credit partner?'),
+                'name' => self::API_CERTIFIED,
+                'required' => true,
+                'values' => [
+                    [
+                        'id' => 'certified_1',
+                        'value' => '1',
+                        'label' => $module->l('Yes'),
+                    ],
+                    [
+                        'id' => 'certified_0',
+                        'value' => '0',
+                        'label' => $module->l('No'),
+                    ],
+                ],
+            ],
+            [
+                'type' => 'switch',
+                'label' => $module->l('Inform Home Credit when shipped? (Else when delivered.)', __CLASS__),
+                'name' => self::EXPORT_METHOD,
+                'required' => true,
+                'values' => [
+                    [
+                        'id' => 'shipped_1',
+                        'value' => '1',
+                        'label' => $module->l('Yes'),
+                    ],
+                    [
+                        'id' => 'shipped_0',
+                        'value' => '0',
+                        'label' => $module->l('No'),
+                    ],
+                ],
+            ]
+        ];
+
+        $orderStateInputs = [];
+        $options = self::generateOrderStateOptions($manager, $module, $language);
+
+        foreach ($manager->getStates(false) as $state) {
+            $orderStateInputs[] = [
+                'type' => 'select',
+                'label' => $module->l($state->getName($language->iso_code)),
+                'name' => $state->getId(),
+                'required' => true,
+                'options' => [
+                    'query' => $options,
+                    'id' => 'id',
+                    'name' => 'name',
+                ],
+            ];
+        }
+        return array_merge($inputsToPrepend, $orderStateInputs, $inputsToAppend);
+    }
+
+    private static function generateOrderStateOptions(OrderStateManager $stateManager, Module $module, Language $language)
+    {
+        $unclassifiedState = $stateManager->getState(UnclassifiedState::ID);
+        $options = [
+            ['id' => self::OPTION_ID_GENERATE, 'name' => $module->l("Generate new state")],
+            ['id' => self::OPTION_ID_UNCLASSIFIED, 'name' => $module->l($unclassifiedState->getName($language->iso_code))]
+        ];
+
+        $availableOrderStates = Db::getInstance(_PS_USE_SQL_SLAVE_)->query('
+SELECT *
+FROM `' . _DB_PREFIX_ . 'order_state_lang` osl 
+WHERE osl.`id_lang` = ' . $language->id . '
+ORDER BY `name` ASC')
+            ->fetchAll(PDO::FETCH_ASSOC);
+
+        $newOptions = array_map(function ($i) use ($module) {
+            return ['id' => $i['id_order_state'], 'name' => $module->l($i['name'])];
+        }, $availableOrderStates);
+
+        return array_merge($options, $newOptions);
     }
 }

@@ -7,7 +7,7 @@
 
 namespace MyLoan;
 
-use MyLoan\HomeCredit\RequestAPI;
+use MyLoan\HomeCredit\EndPointManager;
 
 /**
  * Class Tools
@@ -217,10 +217,11 @@ class Tools
      */
     public static function genCalculatorUrl($productPrice)
     {
+        $manager = EndPointManager::getInstance();
         if (\MlcConfig::get(\MlcConfig::API_CERTIFIED)) {
-            $url = \MlcConfig::getApiCalcCertifiedUrl(\MlcConfig::get(\MlcConfig::API_COUNTRY));
+            $url = $manager->getApiCalcCertifiedUrl(\MlcConfig::get(\MlcConfig::API_COUNTRY));
         } else {
-            $url = \MlcConfig::getApiCalcPublicUrl(\MlcConfig::get(\MlcConfig::API_COUNTRY));
+            $url = $manager->getApiCalcPublicUrl(\MlcConfig::get(\MlcConfig::API_COUNTRY));
             $url = self::buildPublicHcCalculatorUrl($productPrice, $url);
         }
 

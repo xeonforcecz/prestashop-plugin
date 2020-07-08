@@ -13,13 +13,11 @@ include(dirname(__FILE__) . DIRECTORY_SEPARATOR . 'vendor/autoload.php');
 
 class MyLoanConnector extends PaymentModule
 {
-    private $isoLangIdPairs = array();
-
     public function __construct()
     {
         $this->name = "myloanconnector";
         $this->tab = 'payments_gateways';
-        $this->version = '1.0.0';
+        $this->version = '1.0.1';
         $this->author = 'HN Consulting Brno, s.r.o.';
         $this->controllers = array('downPayment', 'changePayment', 'loanNotification', 'loanUpdate');
         $this->need_instance = 0;
@@ -36,6 +34,12 @@ class MyLoanConnector extends PaymentModule
                 $this->warning = $this->l('Module must be configured first!');
             }
         }
+
+        $installedVersion = $this->getInstalledVersion();
+        if ($this->version !== $installedVersion) {
+            $this->makeMigrationToNewVersion($installedVersion);
+        }
+        MlcConfig::updateValue(MlcConfig::MODULE_VERSION, $this->version);
 
         //aby to prestashop přidal do lokalizací
         $this->l('Refresh');
@@ -58,48 +62,6 @@ class MyLoanConnector extends PaymentModule
     }
 
     /**
-     * Vytvoří nové stavy
-     * @param string $identificator
-     * @param array $name
-     * @param string $color
-     * @param bool $hidden
-     * @param bool $delivery
-     * @param bool $logable
-     * @param bool $invocice
-     * @param bool $send_email
-     * @param array $templates
-     */
-    private function createNewOrderState(
-        $identificator = "myloanconnector",
-        $name = array(),
-        $color = "#000000",
-        $hidden = false,
-        $delivery = false,
-        $logable = false,
-        $invocice = false,
-        $send_email = false,
-        $templates = array()
-    ) {
-        $orderState = new OrderState();
-
-        unset($name["undefined"]);
-        unset($templates["undefined"]);
-
-        $orderState->name = $name;
-        $orderState->color = $color;
-        $orderState->hidden = $hidden;
-        $orderState->delivery = $delivery;
-        $orderState->logable = $logable;
-        $orderState->invoice = $invocice;
-        $orderState->send_email = $send_email;
-        $orderState->template = $templates;
-        $orderState->module_name = Tools::strtoupper($identificator);
-
-        $orderState->add();
-        Configuration::updateValue(Tools::strtoupper($identificator), (int)$orderState->id);
-    }
-
-    /**
      * Provede instalaci potřebných součástí
      * @return bool|void
      */
@@ -109,212 +71,7 @@ class MyLoanConnector extends PaymentModule
             Shop::setContext(Shop::CONTEXT_ALL);
         }
 
-        $ORDER_STATES_INSTALLED = Tools::strtoupper($this->name . "_ORDER_STATES_INSTALLED");
-
-        // Check if module was already installed in past, if so, reuse states.
-        if (MlcConfig::get($ORDER_STATES_INSTALLED) != true) {
-            $this->createNewOrderState(
-                "HC_PROCESSING",
-                array(
-                  $this->getLangIdFromIso("en") => "HC - Processing",
-                  $this->getLangIdFromIso("cs") => "HC - Čeká na schválení",
-                  $this->getLangIdFromIso("sk") => "HC - Čeká na schválení",
-                ),
-                "#0000FF",
-                false,
-                false,
-                false,
-                false,
-                false,
-                array(
-                  $this->getLangIdFromIso("en") => "hc_processing",
-                  $this->getLangIdFromIso("cs") => "hc_processing",
-                  $this->getLangIdFromIso("sk") => "hc_processing",
-                )
-            );
-
-            $this->createNewOrderState(
-                "HC_READY",
-                array(
-                  $this->getLangIdFromIso("en") => "HC - Approved",
-                  $this->getLangIdFromIso("cs") => "HC - Schváleno",
-                  $this->getLangIdFromIso("sk") => "HC - Schváleno",
-                ),
-                "#00FF00",
-                false,
-                false,
-                false,
-                false,
-                false,
-                array(
-                  $this->getLangIdFromIso("en") => "hc_ready",
-                  $this->getLangIdFromIso("cs") => "hc_ready",
-                  $this->getLangIdFromIso("sk") => "hc_ready",
-                )
-            );
-
-            $this->createNewOrderState(
-                "HC_REJECTED",
-                array(
-                  $this->getLangIdFromIso("en") => "HC - Rejected",
-                  $this->getLangIdFromIso("cs") => "HC - Zamítnuto",
-                  $this->getLangIdFromIso("sk") => "HC - Zamítnuto",
-                ),
-                "#FF0000",
-                false,
-                false,
-                false,
-                false,
-                false,
-                array(
-                  $this->getLangIdFromIso("en") => "hc_rejected",
-                  $this->getLangIdFromIso("cs") => "hc_rejected",
-                  $this->getLangIdFromIso("sk") => "hc_rejected",
-                )
-            );
-            $this->createNewOrderState(
-                "HC_CANCELLED",
-                array(
-                $this->getLangIdFromIso("en") => "HC - Order cancled",
-                $this->getLangIdFromIso("cs") => "HC - Objednávka stornována",
-                $this->getLangIdFromIso("sk") => "HC - Objednávka stornována",
-                ),
-                "#FF0000",
-                false,
-                false,
-                false,
-                false,
-                false,
-                array(
-                $this->getLangIdFromIso("en") => "hc_canclled",
-                $this->getLangIdFromIso("cs") => "hc_canclled",
-                $this->getLangIdFromIso("sk") => "hc_canclled",
-                )
-            );
-
-            $this->createNewOrderState(
-                "HC_READY_TO_SHIP",
-                array(
-                $this->getLangIdFromIso("en") => "HC - Order is ready for shipping",
-                $this->getLangIdFromIso("cs") => "HC - Objednávka připravena k odeslání",
-                $this->getLangIdFromIso("sk") => "HC - Objednávka připravena k odeslání",
-                ),
-                "#00FF00",
-                false,
-                false,
-                false,
-                false,
-                false,
-                array(
-                $this->getLangIdFromIso("en") => "hc_shipping",
-                $this->getLangIdFromIso("cs") => "hc_shipping",
-                $this->getLangIdFromIso("sk") => "hc_shipping",
-                )
-            );
-
-            $this->createNewOrderState(
-                "HC_READY_SHIPPED",
-                array(
-                $this->getLangIdFromIso("en") => "HC - Order was shipped",
-                $this->getLangIdFromIso("cs") => "HC - Objednávka odeslána",
-                $this->getLangIdFromIso("sk") => "HC - Objednávka odeslána",
-                ),
-                "#00DD00",
-                false,
-                true,
-                false,
-                false,
-                false,
-                array(
-                $this->getLangIdFromIso("en") => "hc_shipped",
-                $this->getLangIdFromIso("cs") => "hc_shipped",
-                $this->getLangIdFromIso("sk") => "hc_shipped",
-                )
-            );
-
-            $this->createNewOrderState(
-                "HC_READY_DELIVERED",
-                array(
-                $this->getLangIdFromIso("en") => "HC - Order was delivered",
-                $this->getLangIdFromIso("cs") => "HC - Objednávka byla doručena",
-                $this->getLangIdFromIso("sk") => "HC - Objednávka byla doručena",
-                ),
-                "#00DD00",
-                false,
-                true,
-                false,
-                false,
-                false,
-                array(
-                $this->getLangIdFromIso("en") => "hc_delivered",
-                $this->getLangIdFromIso("cs") => "hc_delivered",
-                $this->getLangIdFromIso("sk") => "hc_delivered",
-                )
-            );
-
-            $this->createNewOrderState(
-                "HC_READY_DELIVERING",
-                array(
-                $this->getLangIdFromIso("en") => "HC - Order is being deliverd",
-                $this->getLangIdFromIso("cs") => "HC - Objednávka doručována",
-                $this->getLangIdFromIso("sk") => "HC - Objednávka doručována",
-                ),
-                "#009900",
-                false,
-                true,
-                false,
-                false,
-                false,
-                array(
-                $this->getLangIdFromIso("en") => "hc_delivering",
-                $this->getLangIdFromIso("cs") => "hc_delivering",
-                $this->getLangIdFromIso("sk") => "hc_delivering",
-                )
-            );
-
-            $this->createNewOrderState(
-                "HC_READY_PAID",
-                array(
-                $this->getLangIdFromIso("en") => "HC - Order is paid",
-                $this->getLangIdFromIso("cs") => "HC - Objednávka zaplacena",
-                $this->getLangIdFromIso("sk") => "HC - Objednávka zaplacena",
-                ),
-                "#009900",
-                false,
-                true,
-                false,
-                true,
-                false,
-                array(
-                $this->getLangIdFromIso("en") => "hc_paid",
-                $this->getLangIdFromIso("cs") => "hc_paid",
-                $this->getLangIdFromIso("sk") => "hc_paid",
-                )
-            );
-
-            Configuration::updateValue($ORDER_STATES_INSTALLED, true);
-        }
-
         return parent::install() && MlcConfig::install();
-    }
-
-    /**
-     * Vratí id jazyka pokud je v prestashopu nainstalován
-     * @param $iso
-     * @return mixed
-     */
-    public function getLangIdFromIso($iso)
-    {
-        if (empty($this->isoLangIdPairs)) {
-            foreach (Language::getLanguages() as $language) {
-                $this->isoLangIdPairs[$language["iso_code"]] = $language["id_lang"];
-            }
-        }
-
-        if(array_key_exists($iso, $this->isoLangIdPairs))
-            return $this->isoLangIdPairs[$iso];
-        else
-            return "undefined";
     }
 
     /**
@@ -590,5 +347,41 @@ class MyLoanConnector extends PaymentModule
             'search' => false,
           ],
         ];
+    }
+
+    private function getInstalledVersion()
+    {
+        if (MlcConfig::hasKey(MlcConfig::MODULE_VERSION)) {
+            return MlcConfig::get(MlcConfig::MODULE_VERSION);
+        } else if (MlcConfig::hasKey(Tools::strtoupper($this->name . "_ORDER_STATES_INSTALLED"))) {
+            return "1.0.0";
+        } else {
+            return $this->version;
+        }
+    }
+
+    private function makeMigrationToNewVersion($installedVersion)
+    {
+        switch ($installedVersion) {
+            case "1.0.0":
+                $this->migrationTo_1_0_1($installedVersion);
+            case "1.0.1":
+            default:
+                return true;
+        }
+    }
+
+    private function migrationTo_1_0_1($installedVersion = "1.0.0")
+    {
+        if (version_compare($installedVersion, "1.0.1") >= 0)
+            return; // Pokud nainstalovaná verze je 1.0.1 nebo novější tak migraci neprováděj
+        $orderState = new MyLoan\HomeCredit\OrderStateManager();
+        foreach ($orderState->getIdStates(false) as $idState) {
+            MlcConfig::updateValue(MlcConfig::getIdOfOrderStateMapping($idState), MlcConfig::get($idState));
+            MlcConfig::updateValue(MlcConfig::getIdOfOrderStateGenerated($idState), 1);
+        }
+        // Vytvořeni stavu "Nezařazeno"
+        $id = MlcConfig::generateNewOrderState($orderState->getState(MyLoan\HomeCredit\OrderStates\UnclassifiedState::ID));
+        MlcConfig::updateValue(MlcConfig::getIdOfOrderStateMapping(MyLoan\HomeCredit\OrderStates\UnclassifiedState::ID), $id);
     }
 }

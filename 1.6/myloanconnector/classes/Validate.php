@@ -37,7 +37,7 @@ class Validate
           self::checkCurrency($currency, $cart) &&
           $module->validateOrder(
               (int)$cart->id,
-              \MlcConfig::get("HC_PROCESSING"),
+              \MlcConfig::get(\MlcConfig::getIdOfOrderStateMapping(\MyLoan\HomeCredit\OrderStates\ProcessingState::ID)),
               $cart->getOrderTotal(true, \Cart::BOTH),
               $module->displayName,
               null,

@@ -107,11 +107,6 @@ class Loan extends ObjectModel
       ]
     ];
 
-    public function __construct($id = null, $id_lang = null, $id_shop = null)
-    {
-        parent::__construct($id, $id_lang, $id_shop);
-    }
-
     /**
      * Aktualizace objednávky v Myloan
      * @param $id
@@ -179,7 +174,7 @@ class Loan extends ObjectModel
 
         DB::getInstance()->execute("UPDATE `" . _DB_PREFIX_ . "orders` 
                   SET `downpayment` = '" . $down_payment . "' 
-                  WHERE `ps161_orders`.`id_order` = " . $this->id_order . ";");
+                  WHERE `id_order` = " . $this->id_order . ";");
     }
 
     /**

@@ -65,7 +65,7 @@ class PaymentMethods extends ModuleFrontController
     }
 
     /**
-     * ZobrazÌ zadanou zpr·vu
+     * Zobraz√≠ zadanou zpr√°vu
      * @param $text
      * @param $type
      */

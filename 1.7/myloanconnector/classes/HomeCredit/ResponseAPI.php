@@ -9,6 +9,14 @@ namespace MyLoan\HomeCredit;
 
 use Loan;
 use MlcConfig;
+use MyLoan\HomeCredit\OrderStates\ProcessingState;
+use MyLoan\HomeCredit\OrderStates\ReadyPaidState;
+use MyLoan\HomeCredit\OrderStates\ReadyState;
+use MyLoan\HomeCredit\OrderStates\ReadyToDeliveredState;
+use MyLoan\HomeCredit\OrderStates\ReadyToDeliveringState;
+use MyLoan\HomeCredit\OrderStates\ReadyToShippedState;
+use MyLoan\HomeCredit\OrderStates\RejectedState;
+use MyLoan\HomeCredit\OrderStates\UnclassifiedState;
 use MyLoan\Tools;
 use Order;
 use PrestaShopModuleException;
@@ -75,11 +83,11 @@ class ResponseAPI
      */
     public static function authLoanCreateResponse(Loan $loan)
     {
-        return $loan->getApplicationId() === (string)\Tools::getValue("applicationId");
+        return $loan->getApplicationId() === (string)\Tools::getValue("id");
     }
 
     /**
-     * Nastaví stav objednávky podle stavu z Myloan
+     * NastavÃ­ stav objednÃ¡vky podle stavu z Myloan
      * @param $stateReason
      * @param $order_id
      * @throws PrestaShopModuleException
@@ -87,7 +95,30 @@ class ResponseAPI
     public static function changeOrderState($stateReason, $order_id)
     {
         $order = new Order($order_id);
-        $newState = $order->current_state;
+        $managedState = self::transformStateReasonToManagedState($stateReason);
+
+        if (MlcConfig::hasKey(MlcConfig::getIdOfOrderStateMapping($managedState))) {
+            $newState = MlcConfig::get(MlcConfig::getIdOfOrderStateMapping($managedState));
+        } elseif (!MlcConfig::isOrderStateGenerated(UnclassifiedState::ID)) {
+            $newState = MlcConfig::get(MlcConfig::getIdOfOrderStateMapping(UnclassifiedState::ID));
+        } else {
+            $newState = MlcConfig::generateNewOrderState((new OrderStateManager)->getState(UnclassifiedState::ID));
+            MlcConfig::updateValue(UnclassifiedState::ID, $newState);
+        }
+
+        if ($order->current_state != $newState) {
+            $order->setCurrentState($newState);
+            $order->update();
+        }
+    }
+
+    /**
+     * @param string $stateReason
+     * @return string
+     * @throws PrestaShopModuleException
+     */
+    private static function transformStateReasonToManagedState($stateReason)
+    {
         switch ($stateReason) {
             case Loan::PROCESSING_PREAPPROVED:
             case Loan::PROCESSING_REDIRECT_NEEDED:
@@ -95,34 +126,23 @@ class ResponseAPI
             case Loan::PROCESSING_SIGNED:
             case Loan::PROCESSING_APPROVED:
             case Loan::PROCESSING_ALT_OFFER:
-                $newState = MlcConfig::get("HC_PROCESSING");
-                break;
+                return ProcessingState::ID;
             case Loan::CANCELLED_NOT_PAID:
             case Loan::CANCELLED_RETURNED:
             case Loan::REJECTED:
-                $newState = MlcConfig::get("HC_REJECTED");
-                break;
+                return RejectedState::ID;
             case Loan::READY_TO_SHIP:
-                $newState = MlcConfig::get("HC_READY");
-                break;
+                return ReadyState::ID;
             case Loan::READY_SHIPPED:
-                $newState = MlcConfig::get("HC_READY_SHIPPED");
-                break;
+                return ReadyToShippedState::ID;
             case Loan::READY_DELIVERING:
-                $newState = MlcConfig::get("HC_READY_DELIVERING");
-                break;
+                return ReadyToDeliveringState::ID;
             case Loan::READY_DELIVERED:
-                $newState = MlcConfig::get("HC_READY_DELIVERED");
-                break;
+                return ReadyToDeliveredState::ID;
             case Loan::READY_PAID:
-                $newState = MlcConfig::get("HC_READY_PAID");
-                break;
+                return ReadyPaidState::ID;
             default:
                 throw new PrestaShopModuleException("HomeCredit API - unknown response stateReason");
-        }
-        if ($order->current_state != $newState) {
-            $order->setCurrentState($newState);
-            $order->update();
         }
     }
 }

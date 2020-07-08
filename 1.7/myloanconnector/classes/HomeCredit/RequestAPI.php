@@ -28,60 +28,6 @@ use PrestaShopModuleException;
  */
 class RequestAPI extends AuthAPI
 {
-    /**
-     *
-     */
-    const END_POINT_CZ = "https://api.homecredit.cz/";
-    /**
-     *
-     */
-    const END_POINT_SK = "https://api.homecredit.sk/";
-
-    /**
-     *
-     */
-    const END_POINT_CZ_TEST = "https://apicz-test.homecredit.net/verdun-train/";
-    /**
-     *
-     */
-    const END_POINT_SK_TEST = "https://apisk-test.homecredit.net/verdun-train/";
-
-    /**
-     *
-     */
-    const END_POINT_CALCULATOR_CZ = "https://api.homecredit.cz/public/v1/calculator/";
-    /**
-     *
-     */
-    const END_POINT_CALCULATOR_SK = "https://api.homecredit.sk/public/v1/calculator/";
-
-    /**
-     *
-     */
-    const END_POINT_CALCULATOR_PUBLIC_CZ = "https://kalkulacka.homecredit.cz/";
-    /**
-     *
-     */
-    const END_POINT_CALCULATOR_PUBLIC_TEST_CZ = "https://kalkulacka.train.hciapp.net/";
-    /**
-     *
-     */
-    const END_POINT_CALCULATOR_PUBLIC_SK = "https://kalkulacka.homecredit.sk/";
-    /**
-     *
-     */
-    const END_POINT_CALCULATOR_PUBLIC_TEST_SK = "https://kalkulacka-sk.train.hciapp.net/";
-
-    /**
-     *
-     */
-    const END_POINT_CALCULATOR_CZ_TEST = "https://apicz-test.homecredit.net/verdun-train/public/v1/calculator/";
-    /**
-     *
-     */
-    const END_POINT_CALCULATOR_SK_TEST = "https://apisk-test.homecredit.net/verdun-train/public/v1/calculator/";
-
-
     private $client;
 
     /**
@@ -402,7 +348,7 @@ class RequestAPI extends AuthAPI
           'number' => $order->reference,
           'totalPrice' =>  $totalPrice,
           'totalVat' => [$totalVat],
-          'variableSymbols' => [$order->invoice_number],
+          'variableSymbols' => ["{$order->id}"],
           'addresses' => [$addressBilling, $addressDelivery],
           'items' => $this->createItems($order, $currency)
         );

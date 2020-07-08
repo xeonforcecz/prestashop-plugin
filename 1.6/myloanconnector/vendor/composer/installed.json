@@ -6,15 +6,15 @@
         "source": {
             "type": "git",
             "url": "https://github.com/components/jquery.git",
-            "reference": "901828b7968b18319e377dc23d466f28426ee083"
+            "reference": "b33e8f0f9a1cb2ae390cf05d766a900b53d2125b"
         },
         "dist": {
             "type": "zip",
-            "url": "https://api.github.com/repos/components/jquery/zipball/901828b7968b18319e377dc23d466f28426ee083",
-            "reference": "901828b7968b18319e377dc23d466f28426ee083",
+            "url": "https://api.github.com/repos/components/jquery/zipball/b33e8f0f9a1cb2ae390cf05d766a900b53d2125b",
+            "reference": "b33e8f0f9a1cb2ae390cf05d766a900b53d2125b",
             "shasum": ""
         },
-        "time": "2019-10-23T05:15:13+00:00",
+        "time": "2020-05-05T13:21:02+00:00",
         "type": "component",
         "extra": {
             "component": {
@@ -97,7 +97,7 @@
         "version_normalized": "9999999-dev",
         "source": {
             "type": "git",
-            "url": "https://mycatteam.visualstudio.com/hc-prestashop/_git/HcApi",
+            "url": "https://LukasCerny:c3zc7dkajoai4k7yv3dg2t4wajxdmap773fzlnnlugcofk2inclq@mycatteam.visualstudio.com/hc-prestashop/_git/HcApi",
             "reference": "b06cd76b0bdbbb91b287346a87a723612e7f6075"
         },
         "require": {
@@ -260,7 +260,8 @@
                 "homepage": "http://robloach.net"
             }
         ],
-        "description": "Allows installation of Components via Composer."
+        "description": "Allows installation of Components via Composer.",
+        "abandoned": "oomphinc/composer-installers-extender"
     },
     {
         "name": "symfony/process",
@@ -269,18 +270,18 @@
         "source": {
             "type": "git",
             "url": "https://github.com/symfony/process.git",
-            "reference": "9a4545c01e1e4f473492bd52b71e574dcc401ca2"
+            "reference": "8a895f0c92a7c4b10db95139bcff71bdf66d4d21"
         },
         "dist": {
             "type": "zip",
-            "url": "https://api.github.com/repos/symfony/process/zipball/9a4545c01e1e4f473492bd52b71e574dcc401ca2",
-            "reference": "9a4545c01e1e4f473492bd52b71e574dcc401ca2",
+            "url": "https://api.github.com/repos/symfony/process/zipball/8a895f0c92a7c4b10db95139bcff71bdf66d4d21",
+            "reference": "8a895f0c92a7c4b10db95139bcff71bdf66d4d21",
             "shasum": ""
         },
         "require": {
             "php": "^5.5.9|>=7.0.8"
         },
-        "time": "2019-11-28T10:05:51+00:00",
+        "time": "2020-05-23T17:05:51+00:00",
         "type": "library",
         "extra": {
             "branch-alias": {
@@ -311,6 +312,20 @@
             }
         ],
         "description": "Symfony Process Component",
-        "homepage": "https://symfony.com"
+        "homepage": "https://symfony.com",
+        "funding": [
+            {
+                "url": "https://symfony.com/sponsor",
+                "type": "custom"
+            },
+            {
+                "url": "https://github.com/fabpot",
+                "type": "github"
+            },
+            {
+                "url": "https://tidelift.com/funding/github/packagist/symfony/symfony",
+                "type": "tidelift"
+            }
+        ]
     }
 ]

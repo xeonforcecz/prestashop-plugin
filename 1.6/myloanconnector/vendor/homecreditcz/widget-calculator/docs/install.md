@@ -1,5 +1,7 @@
 # Home Credit online kalkulačka
 
+> Tuto variantu kalkulačky mohou využít pouze vázaní partneři. Pro nevázané partnery ("tipaře") slouží standalone varianta kalkulačky - více info např. [zde](https://github.com/homecreditcz/oneclick-api/wiki/Produk%C4%8Dn%C3%AD-prost%C5%99ed%C3%AD))
+
 Kalkulačka (jejíž kód běží v prohlížeči zákazníka) potřebuje získat data o možných splátkách. Pomocí HTTP GET provolá odpovídající API endpointy Home Creditu. Tyto požadavky musí obsahovat odpovídající API key HTTP hlavičku.
 
 ## Instalace software Kalkulačky
@@ -28,6 +30,8 @@ která zjistí potřebné údaje a zavolá dodanou funkci `showHcCalc(productSet
   - pro testovací účely:
     - CZ: ***COCHCONL***
     - SK: ***COCHCONL***
+    
+> Tento parametr udává produktovou sadu Home Creditu, jenž se má pro výpočet použít - pokud je zboží zařazeno do speciální akce (např. "Za 0%"), na které se vztahuje kalkulace pod akční produktovou sadou, je potřeba tuto sadu v tomto kroku použít - **Je žádoucí, aby ve správě produktů e-shopu byla možnost tuto vlastnost jednoduše nastavovat (alternativou je mít tuto možnost např. pro vybranou kategorii produktů). Výběr konkrétního produktu pak vede na použití akční produktové sady (`productSetCode`) při inicializaci kalkulačky**
 
 - `price` - cena daného zboží (košíku)
 
@@ -44,8 +48,8 @@ která zjistí potřebné údaje a zavolá dodanou funkci `showHcCalc(productSet
 
 - `apiKey` – API klíč, konstanta dodaná HC
   - pro testovací účely:
-    - CZ: ***calculator_test_key***
-    - SK: ***calculator_test_key***
+    - CZ: ***calculator_test_key*** / ***calculator_test_key_dp*** (s podporou pro akontace)
+    - SK: ***calculator_test_key*** / ***calculator_test_key_dp*** (s podporou pro akontace)
   - na produkčním prostředí:
     - obdržíte od zodpovědné osoby z HC po schválení vaší implementace
 

@@ -4,7 +4,7 @@
 
 namespace Composer\Autoload;
 
-class ComposerStaticInit5baf9c6222ed149e8b8f52be4e058bcc
+class ComposerStaticInitede1a9dff141b968d0d36bd817ca20e3
 {
     public static $files = array (
         'ce89ac35a6c330c55f4710717db9ff78' => __DIR__ . '/..' . '/kriswallsmith/assetic/src/functions.php',
@@ -15,12 +15,20 @@ class ComposerStaticInit5baf9c6222ed149e8b8f52be4e058bcc
         array (
             'Symfony\\Component\\Process\\' => 26,
         ),
+        'M' => 
+        array (
+            'MyLoan\\' => 7,
+        ),
     );
 
     public static $prefixDirsPsr4 = array (
         'Symfony\\Component\\Process\\' => 
         array (
             0 => __DIR__ . '/..' . '/symfony/process',
+        ),
+        'MyLoan\\' => 
+        array (
+            0 => __DIR__ . '/../..' . '/classes',
         ),
     );
 
@@ -46,6 +54,23 @@ class ComposerStaticInit5baf9c6222ed149e8b8f52be4e058bcc
         'Loan' => __DIR__ . '/../..' . '/classes/Loan.php',
         'MlcConfig' => __DIR__ . '/../..' . '/classes/MlcConfig.php',
         'MyLoan\\HomeCredit\\AuthAPI' => __DIR__ . '/../..' . '/classes/HomeCredit/AuthAPI.php',
+        'MyLoan\\HomeCredit\\EndPointManager' => __DIR__ . '/../..' . '/classes/HomeCredit/EndPointManager.php',
+        'MyLoan\\HomeCredit\\EndPoints\\Czech' => __DIR__ . '/../..' . '/classes/HomeCredit/EndPoints/Czech.php',
+        'MyLoan\\HomeCredit\\EndPoints\\CzechTest' => __DIR__ . '/../..' . '/classes/HomeCredit/EndPoints/CzechTest.php',
+        'MyLoan\\HomeCredit\\EndPoints\\IEndPoint' => __DIR__ . '/../..' . '/classes/HomeCredit/EndPoints/IEndPoint.php',
+        'MyLoan\\HomeCredit\\EndPoints\\Slovak' => __DIR__ . '/../..' . '/classes/HomeCredit/EndPoints/Slovak.php',
+        'MyLoan\\HomeCredit\\EndPoints\\SlovakTest' => __DIR__ . '/../..' . '/classes/HomeCredit/EndPoints/SlovakTest.php',
+        'MyLoan\\HomeCredit\\OrderStateManager' => __DIR__ . '/../..' . '/classes/HomeCredit/OrderStateManager.php',
+        'MyLoan\\HomeCredit\\OrderStates\\AbstractState' => __DIR__ . '/../..' . '/classes/HomeCredit/OrderStates/AbstractState.php',
+        'MyLoan\\HomeCredit\\OrderStates\\ProcessingState' => __DIR__ . '/../..' . '/classes/HomeCredit/OrderStates/ProcessingState.php',
+        'MyLoan\\HomeCredit\\OrderStates\\ReadyPaidState' => __DIR__ . '/../..' . '/classes/HomeCredit/OrderStates/ReadyPaidState.php',
+        'MyLoan\\HomeCredit\\OrderStates\\ReadyState' => __DIR__ . '/../..' . '/classes/HomeCredit/OrderStates/ReadyState.php',
+        'MyLoan\\HomeCredit\\OrderStates\\ReadyToDeliveredState' => __DIR__ . '/../..' . '/classes/HomeCredit/OrderStates/ReadyToDeliveredState.php',
+        'MyLoan\\HomeCredit\\OrderStates\\ReadyToDeliveringState' => __DIR__ . '/../..' . '/classes/HomeCredit/OrderStates/ReadyToDeliveringState.php',
+        'MyLoan\\HomeCredit\\OrderStates\\ReadyToShipState' => __DIR__ . '/../..' . '/classes/HomeCredit/OrderStates/ReadyToShipState.php',
+        'MyLoan\\HomeCredit\\OrderStates\\ReadyToShippedState' => __DIR__ . '/../..' . '/classes/HomeCredit/OrderStates/ReadyToShippedState.php',
+        'MyLoan\\HomeCredit\\OrderStates\\RejectedState' => __DIR__ . '/../..' . '/classes/HomeCredit/OrderStates/RejectedState.php',
+        'MyLoan\\HomeCredit\\OrderStates\\UnclassifiedState' => __DIR__ . '/../..' . '/classes/HomeCredit/OrderStates/UnclassifiedState.php',
         'MyLoan\\HomeCredit\\RequestAPI' => __DIR__ . '/../..' . '/classes/HomeCredit/RequestAPI.php',
         'MyLoan\\HomeCredit\\ResponseAPI' => __DIR__ . '/../..' . '/classes/HomeCredit/ResponseAPI.php',
         'MyLoan\\Tools' => __DIR__ . '/../..' . '/classes/Tools.php',
@@ -56,10 +81,10 @@ class ComposerStaticInit5baf9c6222ed149e8b8f52be4e058bcc
     public static function getInitializer(ClassLoader $loader)
     {
         return \Closure::bind(function () use ($loader) {
-            $loader->prefixLengthsPsr4 = ComposerStaticInit5baf9c6222ed149e8b8f52be4e058bcc::$prefixLengthsPsr4;
-            $loader->prefixDirsPsr4 = ComposerStaticInit5baf9c6222ed149e8b8f52be4e058bcc::$prefixDirsPsr4;
-            $loader->prefixesPsr0 = ComposerStaticInit5baf9c6222ed149e8b8f52be4e058bcc::$prefixesPsr0;
-            $loader->classMap = ComposerStaticInit5baf9c6222ed149e8b8f52be4e058bcc::$classMap;
+            $loader->prefixLengthsPsr4 = ComposerStaticInitede1a9dff141b968d0d36bd817ca20e3::$prefixLengthsPsr4;
+            $loader->prefixDirsPsr4 = ComposerStaticInitede1a9dff141b968d0d36bd817ca20e3::$prefixDirsPsr4;
+            $loader->prefixesPsr0 = ComposerStaticInitede1a9dff141b968d0d36bd817ca20e3::$prefixesPsr0;
+            $loader->classMap = ComposerStaticInitede1a9dff141b968d0d36bd817ca20e3::$classMap;
 
         }, null, ClassLoader::class);
     }
