@@ -241,7 +241,7 @@ class MyLoanConnector extends PaymentModule
         $response = null;
 
         if ($loan->getApplicationId()) {
-            if ($params["newOrderStatus"]->module_name == "HC_READY_SHIPPED") {
+            if ($params["newOrderStatus"]->id == MlcConfig::get(MlcConfig::getIdOfOrderStateMapping(MyLoan\HomeCredit\OrderStates\ReadyToShippedState::ID))) {
                 try {
                     $api = new \MyLoan\HomeCredit\RequestAPI();
                     $response = (array)$api->markOrderAsSent($loan->getApplicationId());
@@ -249,7 +249,7 @@ class MyLoanConnector extends PaymentModule
                     \MyLoan\Tools::addMyError($this->l('State change error! Please contact Home Credit'));
                 }
             } else {
-                if ($params["newOrderStatus"]->module_name == "HC_READY_DELIVERED") {
+                if ($params["newOrderStatus"]->id == MlcConfig::get(MlcConfig::getIdOfOrderStateMapping(MyLoan\HomeCredit\OrderStates\ReadyToDeliveredState::ID))) {
                     try {
                         $api = new \MyLoan\HomeCredit\RequestAPI();
                         $response = (array)$api->markOrderAsDelivered($loan->getApplicationId());
