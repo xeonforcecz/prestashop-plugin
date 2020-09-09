@@ -96,12 +96,13 @@
             let loanCookie = $.parseJSON($.cookie("hc_calculator"));
             return (Math.round(loanCookie.creditAmount) == Math.round({$cartOrderTotal|escape:'quotes'}));
         }
-        
-        function showInfo() {
-            $('#infoModal').modal('toggle');
-        }
 
     </script>
 {else}
 
 {/if}
+<script>
+    function showInfo() {
+        $('#infoModal') .modal('toggle');
+    }
+</script>

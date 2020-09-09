@@ -115,7 +115,6 @@ class RequestAPI extends AuthAPI
         $loan->setApplicationUrl($response['gatewayRedirectUrl']);
         $loan->setCurrency($currency->sign);
         $loan->add();
-
         return $response;
     }
 
@@ -226,9 +225,13 @@ class RequestAPI extends AuthAPI
 
             $link = new Link();
 
+            // Get cover image for your product
             $image = \Image::getCover($orderItem['id_product']);
 
-            $imageLink = "http://".$link->getImageLink(urlencode($orderItem['product_name']), $image["id_image"]);
+            // Load Product Object
+            $product = new \Product($orderItem['id_product'], false, Context::getContext()->language->id);
+
+            $imageLink = "http://".$link->getImageLink(isset($product->link_rewrite) ? $product->link_rewrite : $product->name, $image['id_image'], 'home_default');
             if(strpos($imageLink, "localhost") || strpos($imageLink, "127.0.0.1")){
                 $imageLink = "https://via.placeholder.com/150";
             }
@@ -276,6 +279,42 @@ class RequestAPI extends AuthAPI
                 ),
               'productUrl' => $itemLink,
             );
+        }
+
+        foreach ($order->getShipping() as $item) {
+            $itemTotalPriceWithVat = $item['shipping_cost_tax_incl'];
+            $itemTotalPriceWithoutVat = $item['shipping_cost_tax_excl'];
+            $itemTotalVat = $itemTotalPriceWithVat - $itemTotalPriceWithoutVat;
+            $itemVatRate = Tools::calcVatRate($itemTotalPriceWithoutVat, $itemTotalVat);
+
+            $manufacturer = new Manufacturer($orderItem['id_manufacturer']);
+
+            $items[] = [
+                'code' => $item['id_order_carrier'],
+                'ean' => $item['id_order_carrier'],
+                'name' => $item['carrier_name'],
+                'quantity' =>  1,
+                'manufacturer' => $manufacturer->name,
+                'unitPrice' => [
+                    'amount' => Tools::convertNumberToMinorUnits($itemTotalPriceWithVat, $currency->iso_code),
+                    'currency' => $currency->iso_code,
+                ],
+                'unitVat' => [
+                    'amount' => Tools::convertNumberToMinorUnits($itemTotalVat, $currency->iso_code),
+                    'currency' => $currency->iso_code,
+                    'vatRate' => $itemVatRate,
+                ],
+                'totalPrice' => [
+                    'amount' => Tools::convertNumberToMinorUnits($itemTotalPriceWithVat, $currency->iso_code),
+                    'currency' => $currency->iso_code,
+                ],
+                'totalVat' => [
+                    'amount' => Tools::convertNumberToMinorUnits($itemTotalVat, $currency->iso_code),
+                    'currency' => $currency->iso_code,
+                    'vatRate' => $itemVatRate,
+                ],
+                'productUrl' => $item["url"],
+            ];
         }
 
         return $items;

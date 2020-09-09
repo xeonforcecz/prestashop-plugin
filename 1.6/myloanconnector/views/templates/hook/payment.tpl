@@ -7,7 +7,7 @@
 <div class="row" id="hc-confirm-payment-method">
     <div class="col-xs-12">
         <p class="payment_module" id="hc-select-payment">
-            <a  class="cheque">
+            <a class="cheque" href="{$actionUrl}">
                 <img src="{$hcLogo|escape:'quotes'}" height="30"/>
                 <span>
                 {if !empty($loanOverview)}

@@ -274,6 +274,42 @@ class RequestAPI extends AuthAPI
             );
         }
 
+        foreach ($order->getShipping() as $item) {
+            $itemTotalPriceWithVat = $item['shipping_cost_tax_incl'];
+            $itemTotalPriceWithoutVat = $item['shipping_cost_tax_excl'];
+            $itemTotalVat = $itemTotalPriceWithVat - $itemTotalPriceWithoutVat;
+            $itemVatRate = Tools::calcVatRate($itemTotalPriceWithoutVat, $itemTotalVat);
+
+            $manufacturer = new Manufacturer($orderItem['id_manufacturer']);
+
+            $items[] = [
+                'code' => $item['id_order_carrier'],
+                'ean' => $item['id_order_carrier'],
+                'name' => $item['carrier_name'],
+                'quantity' =>  1,
+                'manufacturer' => $manufacturer->name,
+                'unitPrice' => [
+                    'amount' => Tools::convertNumberToMinorUnits($itemTotalPriceWithVat, $currency->iso_code),
+                    'currency' => $currency->iso_code,
+                ],
+                'unitVat' => [
+                    'amount' => Tools::convertNumberToMinorUnits($itemTotalVat, $currency->iso_code),
+                    'currency' => $currency->iso_code,
+                    'vatRate' => $itemVatRate,
+                ],
+                'totalPrice' => [
+                    'amount' => Tools::convertNumberToMinorUnits($itemTotalPriceWithVat, $currency->iso_code),
+                    'currency' => $currency->iso_code,
+                ],
+                'totalVat' => [
+                    'amount' => Tools::convertNumberToMinorUnits($itemTotalVat, $currency->iso_code),
+                    'currency' => $currency->iso_code,
+                    'vatRate' => $itemVatRate,
+                ],
+                'productUrl' => $item["url"],
+            ];
+        }
+
         return $items;
     }
 

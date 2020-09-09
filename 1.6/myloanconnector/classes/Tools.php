@@ -106,7 +106,7 @@ class Tools
      */
     public static function calcVatRate($priceWithVat, $vat)
     {
-        return round((100 * $vat / $priceWithVat));
+        return $priceWithVat != 0 ? round((100 * $vat / $priceWithVat)) : 0.0;
     }
 
     /**

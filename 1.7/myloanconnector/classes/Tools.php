@@ -110,7 +110,7 @@ class Tools
      */
     public static function calcVatRate($priceWithVat, $vat)
     {
-        return round((100 * $vat / $priceWithVat));
+        return $priceWithVat != 0 ? round((100 * $vat / $priceWithVat)) : 0.0;
     }
 
     /**
@@ -195,7 +195,7 @@ class Tools
           \MlcConfig::isModuleConfigured() &&
           self::productHasMinimalPrice($productPrice) &&
           self::shopHasAllowedCurrency() &&
-          in_array(\Tools::getValue('controller'), ['product', 'order', 'payment', 'orderopc']);
+          in_array(\Tools::getValue('controller'), ['product', 'order', 'payment', 'orderopc', 'default']);
     }
 
     /**
