@@ -142,7 +142,7 @@ class MyLoanConnector extends PaymentModule
      */
     public function hookDisplayProductButtons($hookParams)
     {
-        if (!\MyLoan\Tools::shouldHookModule($hookParams["product"]->price)) {
+        if (!\MyLoan\Tools::shouldHookModule($hookParams["product"]->getPrice())) {
             return false;
         }
 
