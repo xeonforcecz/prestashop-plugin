@@ -73,7 +73,7 @@ class PaymentMethods extends ModuleFrontController
     {
         $this->context->smarty->assign(
             array(
-            "show_message" => $this->module->l($text),
+            "show_message" => $this->module->l($text, __CLASS__),
             "type" => $type
             )
         );

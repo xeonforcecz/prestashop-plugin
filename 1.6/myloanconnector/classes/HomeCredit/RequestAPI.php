@@ -92,7 +92,7 @@ class RequestAPI extends AuthAPI
           "order" => $this->createOrder($order, $currency, $deliveryAddress, $invoiceAddress),
           "type" => "INSTALLMENT",
           "merchantUrls" => $this->createMerchantUrl($link),
-          "settingsInstallment" => $this->createSettingsInstallment($currency),
+            "settingsInstallment" => $this->createSettingsInstallment($currency, $order),
           "agreementPersonalDataProcessing" => true,
         );
 
@@ -224,8 +224,13 @@ class RequestAPI extends AuthAPI
 
             $link = new Link();
 
-            $imageLink = "http://".$link->getImageLink($orderItem["link_rewrite"], (int)$orderItem['id_product']);
-            if(strpos($imageLink, "localhost") || strpos($imageLink, "127.0.0.1")){
+            if(array_key_exists("link_rewrite", $orderItem)) {
+                $imageLink = "http://" . $link->getImageLink($orderItem["link_rewrite"], (int)$orderItem['id_product']);
+            } else {
+                $imageLink = false;
+            }
+
+            if(!$imageLink || strpos($imageLink, "localhost") || strpos($imageLink, "127.0.0.1")){
                 $imageLink = "https://via.placeholder.com/150";
             }
 
@@ -279,6 +284,10 @@ class RequestAPI extends AuthAPI
             $itemTotalPriceWithoutVat = $item['shipping_cost_tax_excl'];
             $itemTotalVat = $itemTotalPriceWithVat - $itemTotalPriceWithoutVat;
             $itemVatRate = Tools::calcVatRate($itemTotalPriceWithoutVat, $itemTotalVat);
+
+            if($itemTotalPriceWithVat == 0){
+                continue;
+            }
 
             $manufacturer = new Manufacturer($orderItem['id_manufacturer']);
 
@@ -349,8 +358,8 @@ class RequestAPI extends AuthAPI
         );
 
 
-        $cartTotalPriceWithVat = $order->getTotalProductsWithTaxes();
-        $cartTotalPriceWithoutVat = $order->getTotalProductsWithoutTaxes();
+        $cartTotalPriceWithVat = $order->total_paid;
+        $cartTotalPriceWithoutVat = $order->total_paid_tax_excl;
         $cartTotalVat = $cartTotalPriceWithVat - $cartTotalPriceWithoutVat;
 
         $orderTotalWithVat = Tools::convertNumberToMinorUnits(
@@ -406,16 +415,17 @@ class RequestAPI extends AuthAPI
     /**
      * Vytvoří defaultní nastavení pro uživatele, pokud je možné vezme z cookies pokud není je toto zvoleno až v Myloan
      * @param Currency $currency
+     * @param Order $order
      * @return array
      */
-    private function createSettingsInstallment(Currency $currency)
+    private function createSettingsInstallment(Currency $currency, Order $order)
     {
         $fingerprintComponents = $this->createFingerprintComponents();
 
         $settingsInstallment =
           array (
             'productCode' => $fingerprintComponents["productCode"],
-            'productSetCode' => MlcConfig::get(MlcConfig::API_PRODUCT_CODE),
+            'productSetCode' => Tools::getCartProductsSetCode($order->getProducts()),
           );
 
         if ($fingerprintComponents) {

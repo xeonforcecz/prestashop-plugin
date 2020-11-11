@@ -24,8 +24,8 @@ class MyLoanConnectorPaymentModuleFrontController extends ModuleFrontController
 
         if (!\MyLoan\Tools::shouldHookModule($cartOrderTotal)) {
             \MyLoan\Tools::showErrorMessage(
-                $module->l('An error occurred while confirming your order.') . " ".
-                $module->l('Please try again later.')
+                $module->l('An error occurred while confirming your order.', __CLASS__) . " ".
+                $module->l('Please try again later.', __CLASS__)
             );
             $this->setTemplate('message.tpl');
             return false;
@@ -39,7 +39,7 @@ class MyLoanConnectorPaymentModuleFrontController extends ModuleFrontController
                 $this->context->currency,
                 $this->context->shop
             )) {
-                \MyLoan\Tools::showErrorMessage($this->l('Order is invalid.'));
+                \MyLoan\Tools::showErrorMessage($this->l('Order is invalid.', __CLASS__));
                 $this->setTemplate('message.tpl');
             }
 

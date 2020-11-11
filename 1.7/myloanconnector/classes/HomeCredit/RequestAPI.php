@@ -94,7 +94,7 @@ class RequestAPI extends AuthAPI
           "order" => $this->createOrder($order, $currency, $deliveryAddress, $invoiceAddress),
           "type" => "INSTALLMENT",
           "merchantUrls" => $this->createMerchantUrl($link),
-          "settingsInstallment" => $this->createSettingsInstallment($currency),
+          "settingsInstallment" => $this->createSettingsInstallment($currency, $order),
           "agreementPersonalDataProcessing" => true,
         );
 
@@ -356,8 +356,8 @@ class RequestAPI extends AuthAPI
         );
 
 
-        $cartTotalPriceWithVat = $order->getTotalProductsWithTaxes();
-        $cartTotalPriceWithoutVat = $order->getTotalProductsWithoutTaxes();
+        $cartTotalPriceWithVat = $order->total_paid;
+        $cartTotalPriceWithoutVat = $order->total_paid_tax_excl;
         $cartTotalVat = $cartTotalPriceWithVat - $cartTotalPriceWithoutVat;
 
         $orderTotalWithVat = Tools::convertNumberToMinorUnits(
@@ -413,16 +413,17 @@ class RequestAPI extends AuthAPI
     /**
      * Vytvo�� defaultn� nastaven� pro u�ivatele, pokud je mo�n� vezme z cookies pokud nen� je toto zvoleno a� v Myloan
      * @param Currency $currency
+     * @param Order $order
      * @return array
      */
-    private function createSettingsInstallment(Currency $currency)
+    private function createSettingsInstallment(Currency $currency, Order $order)
     {
         $fingerprintComponents = $this->createFingerprintComponents();
 
         $settingsInstallment =
           array (
             'productCode' => $fingerprintComponents["productCode"],
-            'productSetCode' => MlcConfig::get(MlcConfig::API_PRODUCT_CODE),
+            'productSetCode' => Tools::getCartProductsSetCode($order->getProducts()),
           );
 
         if ($fingerprintComponents) {

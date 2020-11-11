@@ -79,13 +79,29 @@ function hcCalcloaded(productSetCode, price, downPayment, fixDownPayment, dataCa
   wrapper.appendChild(div);
   body.appendChild(wrapper);
 
+  let path = "";
+
+  // Urèit správnou cestu podle verze PrestaShopu (1.6 nemá definováno prestashop)
+  try {
+    path = prestashop.urls.base_url;
+  } catch {
+
+    if(typeof(baseDir) !== "undefined") {
+      path = baseDir;
+    } else {
+      path = window.location.origin;
+      console.log("Nelze urcit cestu k e-shopu standardne, zkousim: ", path)
+    }
+
+  }
+
   // Definovat cestu k modulu
-  var path = prestashop.urls.base_url + '/modules/myloanconnector/vendor/homecreditcz/widget-calculator/releases/CZ/dist/';
+  path = path + '/modules/myloanconnector/dist/hc-calc-CZ/';
 
   var script = doc.createElement('script');
   script.charset = 'UTF-8';
   script.type = 'text/javascript';
-  script.src = path + 'hc-calc/js/app.js';
+  script.src = path + 'js/app.js';
   body.appendChild(script);
 
   var appContainer = doc.createElement('div');
@@ -93,7 +109,7 @@ function hcCalcloaded(productSetCode, price, downPayment, fixDownPayment, dataCa
   wrapper.appendChild(appContainer);
 
   var resizeScript = doc.createElement('script');
-  resizeScript.src = path + 'hc-calc/js/resize.contentWindow.js';
+  resizeScript.src = path + 'js/resize.contentWindow.js';
   body.appendChild(resizeScript);
 
   var callbackScript = doc.createElement('script');

@@ -65,6 +65,25 @@ class MlcConfig extends Configuration
     /**
      *
      */
+    const API_DISCOUNT_PRODUCT_CODE = self::MODULE_PREFIX . "API_DISCOUNT_PRODUCT_CODE";
+
+    /**
+     *
+     */
+
+    const DISCOUNT_UTM_STRING = self::MODULE_PREFIX . "DISCOUNT_UTM_STRING";
+
+    const REFERRAL_COOKIE_NAME = "utm_source";
+    const REFERRAL_COOKIE_EXPIRE = 60*60*24*7;
+
+    /**
+     * Výchozí slevová kategorie
+     */
+    const WITHOUT_DISCOUNT = 0;
+
+    /**
+     *
+     */
     const API_CALC_KEY = self::MODULE_PREFIX . "API_CALC_KEY";
     /**
      * Nainstalovaná verze modulu
@@ -91,6 +110,34 @@ class MlcConfig extends Configuration
     const OPTION_ID_GENERATE = -2;
     const OPTION_ID_UNCLASSIFIED = -1;
 
+
+    const TABS = array(
+      "name" => [
+          "en" => "Home Credit",
+          "cs" => "Home Credit",
+          "sk" => "Home Credit",
+      ],
+      "class_name" => "MyLoanConnectorTab",
+      "subTabs" => array(
+        array(
+          "name" => [
+              "en" => "Products",
+              "cs" => "Produkty",
+              "sk" => "Produkty",
+          ],
+          "class_name" => "MyLoanConnectorProducts"
+        ),
+        array(
+          "name" => [
+              "en" => "Settings",
+              "cs" => "Nastavení",
+              "sk" => "Nastavení",
+          ],
+          "class_name" => "MyLoanConnectorSettings"
+        )
+      )
+    );
+
     /**
      * Metoda která naisntaluje vše potřebné
      * @return bool
@@ -101,7 +148,8 @@ class MlcConfig extends Configuration
           self::installDefault() &&
           self::registerHooks() &&
           self::createDatabaseTables() &&
-          self::alterDatabaseTables();
+          self::alterDatabaseTables() &&
+          self::installTabs();
     }
 
     /**
@@ -121,6 +169,8 @@ class MlcConfig extends Configuration
         $default_data[self::API_SECRETCODE] = "";
         $default_data[self::API_CERTIFIED] = "0";
         $default_data[self::API_PRODUCT_CODE] = "";
+        $default_data[self::API_DISCOUNT_PRODUCT_CODE] = "";
+        $default_data[self::DISCOUNT_UTM_STRING] = "";
         $default_data[self::API_CALC_KEY] = "calculator_test_key";
         $default_data[self::EXPORT_METHOD] = "0";
 
@@ -167,9 +217,10 @@ class MlcConfig extends Configuration
      */
     public static function createDatabaseTables()
     {
-        return
-          \Db::getInstance()->Execute(
-              'CREATE TABLE IF NOT EXISTS `' . _DB_PREFIX_ . 'hc_loan` (
+        $res = true;
+
+          $res = \Db::getInstance()->Execute(
+            'CREATE TABLE IF NOT EXISTS `' . _DB_PREFIX_ . 'hc_loan` (
             `id_order` int(10) unsigned NOT NULL,
             `id_order_down_payment` int(10) unsigned DEFAULT NULL,
             `withdrawal` tinyint(1) DEFAULT NULL,
@@ -183,6 +234,17 @@ class MlcConfig extends Configuration
             PRIMARY KEY (`id_order`)
         ) ENGINE=' . _MYSQL_ENGINE_ . ' DEFAULT CHARSET=utf8'
           );
+
+        $res &= \Db::getInstance()->Execute(
+          'CREATE TABLE IF NOT EXISTS `' . _DB_PREFIX_ . 'hc_product` (
+            `id_product` int(10) UNSIGNED NOT NULL,
+            `discount` int(32) DEFAULT 0,
+            `referral` int(32) DEFAULT 0,
+            PRIMARY KEY (`id_product`)
+        ) ENGINE=' . _MYSQL_ENGINE_ . ' DEFAULT CHARSET=utf8'
+        );
+
+        return $res;
     }
 
 
@@ -215,7 +277,7 @@ class MlcConfig extends Configuration
                   "UPDATE `" . _DB_PREFIX_ . "order_state` SET `deleted` = '1' WHERE `" . _DB_PREFIX_ . "order_state`.`id_order_state` = '"
                   .MlcConfig::get(ReadyToDeliveredState::ID)."';"
                 );
-            break;
+                break;
         }
 
     }
@@ -230,7 +292,7 @@ class MlcConfig extends Configuration
 
         if ($exists->rowCount() == 0) {
             return \DB::getInstance()->Execute(
-                "ALTER TABLE `" . _DB_PREFIX_ . "orders` ADD `downpayment` decimal(20,6) NOT NULL DEFAULT 0;"
+              "ALTER TABLE `" . _DB_PREFIX_ . "orders` ADD `downpayment` decimal(20,6) NOT NULL DEFAULT 0;"
             );
         }
 
@@ -257,6 +319,8 @@ class MlcConfig extends Configuration
           self::API_SECRETCODE => "isString",
           self::API_CERTIFIED => "isBool",
           self::API_PRODUCT_CODE => "isString",
+          self::API_DISCOUNT_PRODUCT_CODE => "isString",
+          self::DISCOUNT_UTM_STRING => "isString",
           self::API_CALC_KEY => "isString",
           self::EXPORT_METHOD => "isBool"
         ];
@@ -286,9 +350,7 @@ class MlcConfig extends Configuration
         MlcConfig::setExpeditionType($mlcData[self::EXPORT_METHOD]);
 
         if (!self::updateValues($mlcData)) {
-            return $module->displayError(
-                $module->l('An error occurred while updating your configuration. Please try again.', __CLASS__)
-            );
+            return $module->displayError($module->l('An error occurred while updating your configuration. Please try again.', __CLASS__));
         }
 
         if (($testApi = self::testHCApiConnection()) !== true) {
@@ -300,7 +362,6 @@ class MlcConfig extends Configuration
 
 
     /**
-     * Odinstalování pluginu
      * @return bool
      */
     public static function uninstall()
@@ -318,6 +379,8 @@ class MlcConfig extends Configuration
             }
         }
 
+        self::uninstallTabs();
+
         return true;
     }
 
@@ -330,16 +393,18 @@ class MlcConfig extends Configuration
     public static function getConfigArray(OrderStateManager $manager = null)
     {
         $config = [
-            self::API_COUNTRY => self::get(self::API_COUNTRY),
-            self::API_URL => self::get(self::API_URL),
-            self::API_CALC_URL => self::get(self::API_CALC_URL),
-            self::API_USER => self::get(self::API_USER),
-            self::API_PASSWORD => self::get(self::API_PASSWORD),
-            self::API_SECRETCODE => self::get(self::API_SECRETCODE),
-            self::API_CERTIFIED => self::get(self::API_CERTIFIED),
-            self::API_PRODUCT_CODE => self::get(self::API_PRODUCT_CODE),
-            self::API_CALC_KEY => self::get(self::API_CALC_KEY),
-            self::EXPORT_METHOD => self::get(self::EXPORT_METHOD)
+          self::API_COUNTRY => self::get(self::API_COUNTRY),
+          self::API_URL => self::get(self::API_URL),
+          self::API_CALC_URL => self::get(self::API_CALC_URL),
+          self::API_USER => self::get(self::API_USER),
+          self::API_PASSWORD => self::get(self::API_PASSWORD),
+          self::API_SECRETCODE => self::get(self::API_SECRETCODE),
+          self::API_CERTIFIED => self::get(self::API_CERTIFIED),
+          self::API_PRODUCT_CODE => self::get(self::API_PRODUCT_CODE),
+          self::API_DISCOUNT_PRODUCT_CODE => self::get(self::API_DISCOUNT_PRODUCT_CODE),
+          self::DISCOUNT_UTM_STRING => self::get(self::DISCOUNT_UTM_STRING),
+          self::API_CALC_KEY => self::get(self::API_CALC_KEY),
+          self::EXPORT_METHOD => self::get(self::EXPORT_METHOD)
         ];
 
         if ($manager !== null) {
@@ -362,13 +427,13 @@ class MlcConfig extends Configuration
         // Init Fields form array
         $fields_form = [];
         $fields_form[0]['form'] = [
-            'legend' => [
-                'title' => $module->l('Home Credit MyLoan configuration', __CLASS__),
-            ],
-            'input' => self::generateInputs($orderStateManager, $module, $currentLanguage),
-            'submit' => [
-                'title' => $module->l('Save'),
-            ]
+          'legend' => [
+            'title' => $module->l('Home Credit MyLoan configuration', __CLASS__),
+          ],
+          'input' => self::generateInputs($orderStateManager, $module, $currentLanguage),
+          'submit' => [
+            'title' => $module->l('Save', __CLASS__),
+          ]
         ];
 
         $helper = new HelperForm();
@@ -537,96 +602,108 @@ class MlcConfig extends Configuration
      */
     private static function generateInputs(OrderStateManager $manager, Module $module, Language $language)
     {
+
         $inputsToPrepend = [
-            [
-                'type' => 'select',
-                'label' => $module->l('Country', __CLASS__),
-                'name' => self::API_COUNTRY,
-                'required' => true,
-                'options' => [
-                    'query' => [
-                        ['id' => self::CZ_VERSION, 'name' => $module->l(self::CZ_VERSION)],
-                        ['id' => self::SK_VERSION, 'name' => $module->l(self::SK_VERSION)],
-                        ['id' => self::CZ_TEST_VERSION, 'name' => $module->l(self::CZ_TEST_VERSION)],
-                        ['id' => self::SK_TEST_VERSION, 'name' => $module->l(self::SK_TEST_VERSION)],
-                    ],
-                    'id' => 'id',
-                    'name' => 'name',
-                ],
+          [
+            'type' => 'select',
+            'label' => $module->l('Country', __CLASS__),
+            'name' => self::API_COUNTRY,
+            'required' => true,
+            'options' => [
+              'query' => array_map(function($id) use($module) {
+                  return ['id' => $id, 'name' => $module->l($id, __CLASS__)];
+              }, EndPointManager::getInstance()->getVersionList()),
+              'id' => 'id',
+              'name' => 'name',
             ],
-            [
-                'type' => 'text',
-                'label' => $module->l('Username', __CLASS__),
-                'name' => self::API_USER,
-                'size' => 20,
-                'required' => true
-            ],
-            [
-                'type' => 'password',
-                'label' => $module->l('Password', __CLASS__),
-                'name' => self::API_PASSWORD,
-                'size' => 64,
-                'required' => true,
-            ],
-            [
-                'type' => 'password',
-                'label' => $module->l('Secret code', __CLASS__),
-                'name' => self::API_SECRETCODE,
-                'size' => 64,
-                'required' => true,
-            ],
-            [
-                'type' => 'text',
-                'label' => $module->l('Product code', __CLASS__),
-                'name' => self::API_PRODUCT_CODE,
-                'size' => 20,
-                'required' => true
-            ],
-            [
-                'type' => 'text',
-                'label' => $module->l('Calculator API key', __CLASS__),
-                'name' => self::API_CALC_KEY,
-                'size' => 20,
-                'required' => true
-            ]
+          ],
+          [
+            'type' => 'text',
+            'label' => $module->l('Username', __CLASS__),
+            'name' => self::API_USER,
+            'size' => 20,
+            'required' => true
+          ],
+          [
+            'type' => 'password',
+            'label' => $module->l('Password', __CLASS__),
+            'name' => self::API_PASSWORD,
+            'size' => 64,
+            'required' => true,
+          ],
+          [
+            'type' => 'password',
+            'label' => $module->l('Secret code', __CLASS__),
+            'name' => self::API_SECRETCODE,
+            'size' => 64,
+            'required' => true,
+          ],
+          [
+            'type' => 'text',
+            'label' => $module->l('Product code', __CLASS__),
+            'name' => self::API_PRODUCT_CODE,
+            'size' => 20,
+            'required' => true
+          ],
+          [
+            'type' => 'text',
+            'label' => $module->l('Discount product code', __CLASS__),
+            'name' => self::API_DISCOUNT_PRODUCT_CODE,
+            'size' => 20,
+            'required' => true
+          ],
+          [
+            'type' => 'text',
+            'label' => $module->l('Discount utm source string', __CLASS__),
+            'name' => self::DISCOUNT_UTM_STRING,
+            'size' => 20,
+            'required' => true
+          ],
+          [
+            'type' => 'text',
+            'label' => $module->l('Calculator API key', __CLASS__),
+            'name' => self::API_CALC_KEY,
+            'size' => 20,
+            'required' => true
+          ]
         ];
         $inputsToAppend = [
-            [
-                'type' => 'switch',
-                'label' => $module->l('Are you certified Home Credit partner?', __CLASS__),
-                'name' => self::API_CERTIFIED,
-                'required' => true,
-                'values' => [
-                    [
-                        'id' => 'certified_1',
-                        'value' => '1',
-                        'label' => $module->l('Yes', __CLASS__),
-                    ],
-                    [
-                        'id' => 'certified_0',
-                        'value' => '0',
-                        'label' => $module->l('No', __CLASS__),
-                    ],
-                ],
+          [
+            'type' => 'switch',
+            'label' => $module->l('Are you certified Home Credit partner?', __CLASS__),
+            'name' => self::API_CERTIFIED,
+            'required' => true,
+            'values' => [
+              [
+                'id' => 'certified_1',
+                'value' => '1',
+                'label' => $module->l('Yes', __CLASS__),
+              ],
+              [
+                'id' => 'certified_0',
+                'value' => '0',
+                'label' => $module->l('No', __CLASS__),
+              ],
             ],
-            [
-                'type' => 'switch',
-                'label' => $module->l('Inform Home Credit when shipped? (Else when delivered.)', __CLASS__),
-                'name' => self::EXPORT_METHOD,
-                'required' => true,
-                'values' => [
-                    [
-                        'id' => 'shipped_1',
-                        'value' => '1',
-                        'label' => $module->l('Yes', __CLASS__),
-                    ],
-                    [
-                        'id' => 'shipped_0',
-                        'value' => '0',
-                        'label' => $module->l('No', __CLASS__),
-                    ],
-                ],
-            ]
+          ],
+          [
+            'type' => 'switch',
+            'label' => $module->l('Inform Home Credit when shipped? (Else when delivered.)', __CLASS__),
+            'name' => self::EXPORT_METHOD,
+            'required' => true,
+            'values' => [
+              [
+                'id' => 'shipped_1',
+                'value' => '1',
+                'label' => $module->l('Yes', __CLASS__),
+              ],
+              [
+                'id' => 'shipped_0',
+                'value' => '0',
+                'label' => $module->l('No', __CLASS__),
+              ],
+            ],
+          ]
         ];
 
         $orderStateInputs = [];
@@ -634,15 +711,15 @@ class MlcConfig extends Configuration
 
         foreach ($manager->getStates(false) as $state) {
             $orderStateInputs[] = [
-                'type' => 'select',
-                'label' => $module->l($state->getName($language->iso_code)),
-                'name' => $state->getId(),
-                'required' => true,
-                'options' => [
-                    'query' => $options,
-                    'id' => 'id',
-                    'name' => 'name',
-                ],
+              'type' => 'select',
+              'label' => $module->l($state->getName($language->iso_code), __CLASS__),
+              'name' => $state->getId(),
+              'required' => true,
+              'options' => [
+                'query' => $options,
+                'id' => 'id',
+                'name' => 'name',
+              ],
             ];
         }
         return array_merge($inputsToPrepend, $orderStateInputs, $inputsToAppend);
@@ -652,8 +729,8 @@ class MlcConfig extends Configuration
     {
         $unclassifiedState = $stateManager->getState(UnclassifiedState::ID);
         $options = [
-            ['id' => self::OPTION_ID_GENERATE, 'name' => $module->l("Generate new state")],
-            ['id' => self::OPTION_ID_UNCLASSIFIED, 'name' => $module->l($unclassifiedState->getName($language->iso_code))]
+          ['id' => self::OPTION_ID_GENERATE, 'name' => $module->l("Generate new state", __CLASS__)],
+          ['id' => self::OPTION_ID_UNCLASSIFIED, 'name' => $module->l($unclassifiedState->getName($language->iso_code), __CLASS__)]
         ];
 
         $availableOrderStates = Db::getInstance(_PS_USE_SQL_SLAVE_)->query('
@@ -661,12 +738,129 @@ SELECT *
 FROM `' . _DB_PREFIX_ . 'order_state_lang` osl 
 WHERE osl.`id_lang` = ' . $language->id . '
 ORDER BY `name` ASC')
-            ->fetchAll(PDO::FETCH_ASSOC);
+          ->fetchAll(PDO::FETCH_ASSOC);
 
         $newOptions = array_map(function ($i) use ($module) {
-            return ['id' => $i['id_order_state'], 'name' => $module->l($i['name'])];
+            return ['id' => $i['id_order_state'], 'name' => $module->l($i['name'], __CLASS__)];
         }, $availableOrderStates);
 
         return array_merge($options, $newOptions);
     }
+
+
+    /**
+     * Aktivuje položky menu při povolení pluginu
+     * @param bool $force_all
+     * @return bool
+     */
+    public function enable($force_all = false)
+    {
+        return
+          $this->installTabs() &&
+          parent::enable($force_all)
+          ;
+    }
+
+    /**
+     * Deaktivuje položky menu při zakázání pluginu
+     * @param bool $force_all
+     * @return bool
+     */
+    public function disable($force_all = false)
+    {
+        return
+          $this->uninstallTabs() &&
+          parent::disable($force_all)
+          ;
+    }
+
+    /**
+     * Instaluje nové položky menu
+     * @param $class_name
+     * @param $id_parent
+     * @param $name
+     * @return bool|int
+     */
+    private static function installTab($class_name, $id_parent, $name){
+
+        $tab = new Tab();
+        $tab->active = 1;
+        $tab->class_name = $class_name;
+
+        $tab->name = array();
+
+        $module = Module::getInstanceByName(self::MODULE_NAME);
+
+        foreach (Language::getIsoIds(true) as $lang) {
+            $tab->name[$lang['id_lang']] = $name[$lang['iso_code']];
+        }
+
+        $tab->id_parent = $id_parent;
+        $tab->module = self::MODULE_NAME;
+        if(! $tab->add()){
+            return false;
+        }
+
+        return $tab->id;
+
+    }
+
+    /**
+     * Instaluje všechny položky menu
+     * @return bool
+     */
+    public static function installTabs()
+    {
+        $res = true;
+        $parent = self::TABS;
+
+        $id = self::installTab(
+          $parent['class_name'],
+          (int) Tab::getIdFromClassName('IMPROVE'),
+          $parent["name"]
+        );
+
+        foreach ($parent["subTabs"] as $subTab) {
+            $res &= self::installTab($subTab["class_name"], $id, $subTab["name"] ) !== false;
+        }
+
+        return $res;
+
+    }
+
+    /**
+     * Odinstaluje položku menu
+     * @return bool
+     */
+    private static function uninstallTab($tab_name){
+
+        $tabId = (int) Tab::getIdFromClassName($tab_name);
+        if (!$tabId) {
+            return true;
+        }
+
+        $tab = new Tab($tabId);
+        return $tab->delete();
+
+    }
+
+    /**
+     * Odinstaluje všechny položky menu
+     * @return bool
+     */
+    public static function uninstallTabs()
+    {
+        $res = true;
+
+        $parent = self::TABS;
+
+        $res &= self::uninstallTab($parent["class_name"]);
+        foreach ($parent["subTabs"] as $subTab) {
+            $res &= self::uninstallTab($subTab["class_name"]);
+        }
+
+        return $res;
+    }
+
+
 }

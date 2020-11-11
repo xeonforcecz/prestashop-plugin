@@ -19,7 +19,7 @@ class MyLoanConnectorLoanNotificationModuleFrontController extends ModuleFrontCo
         try {
             \MyLoan\HomeCredit\ResponseAPI::processLoanCreateResponse();
             $this->module->displayConfirmation(
-                $this->module->l('Connection to Home Credit My\Loan API was successful!')
+                $this->module->l('Connection to Home Credit My\Loan API was successful!', __CLASS__)
             );
             $orderCollection = \Order::getByReference(\Tools::getValue("orderNumber"));
             $order_id = $orderCollection->getFirst()->id;

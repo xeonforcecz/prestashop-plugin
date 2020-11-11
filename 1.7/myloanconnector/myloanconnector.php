@@ -19,7 +19,7 @@ class MyLoanConnector extends PaymentModule
     {
         $this->name = "myloanconnector";
         $this->tab = 'payments_gateways';
-        $this->version = '1.0.1';
+        $this->version = '1.0.2';
         $this->author = 'HN Consulting Brno, s.r.o.';
         $this->controllers = array('downPayment', 'changePayment', 'loanNotification', 'loanUpdate');
         $this->need_instance = 0;
@@ -27,9 +27,9 @@ class MyLoanConnector extends PaymentModule
         $this->bootstrap = true;
 
         parent::__construct();
-        $this->displayName = $this->l('Home Credit MyLoan');
-        $this->description = $this->l('Home Credit MyLoan integration');
-        $this->confirmUninstall = $this->l('Are you sure you want to uninstall?');
+        $this->displayName = $this->l('Home Credit MyLoan', __CLASS__);
+        $this->description = $this->l('Home Credit MyLoan integration', __CLASS__);
+        $this->confirmUninstall = $this->l('Are you sure you want to uninstall?', __CLASS__);
 
         if (isset($this->context->employee) && $this->context->employee->isLoggedBack()) {
             if (!MlcConfig::isModuleConfigured()) {
@@ -44,9 +44,9 @@ class MyLoanConnector extends PaymentModule
         MlcConfig::updateValue(MlcConfig::MODULE_VERSION, $this->version);
 
         //aby to prestashop přidal do lokalizací
-        $this->l('Refresh');
-        $this->l('State');
-        $this->l('Id');
+        $this->l('Refresh', __CLASS__);
+        $this->l('State', __CLASS__);
+        $this->l('Id', __CLASS__);
 
         if($this->context->cookie->myErrors && is_array($this->context->controller->errors)) {
 
@@ -59,6 +59,25 @@ class MyLoanConnector extends PaymentModule
             unset($this->context->cookie->myErrors);
             $this->context->cookie->write();
 
+        }
+
+        self::handleUtmDiscount();
+
+    }
+    /**
+     * Kontroluje výskyt utm_source v url a nastavuje cookie se slevou
+     * @return void
+     */
+    private static function handleUtmDiscount(){
+
+        $cookie_name = MlcConfig::REFERRAL_COOKIE_NAME;
+        if(Tools::getValue(MlcConfig::REFERRAL_COOKIE_NAME) === MlcConfig::get(MlcConfig::DISCOUNT_UTM_STRING)) {
+            $cookie = new Cookie(MlcConfig::REFERRAL_COOKIE_NAME);
+
+            $cookie->setExpire(time() + MlcConfig::REFERRAL_COOKIE_EXPIRE);
+
+            $cookie->$cookie_name = Tools::getValue(MlcConfig::REFERRAL_COOKIE_NAME);
+            $cookie->write();
         }
 
     }
@@ -113,26 +132,26 @@ class MyLoanConnector extends PaymentModule
         }
 
         $this->context->controller->addCSS($this->_path .  "/views/css/myloan.css");
-        $this->context->controller->addJS($this->_path . "/vendor/components/jquery-cookie/jquery.cookie.js");
+        $this->context->controller->addJS($this->_path . "/dist/jquery.cookie.js");
 
         switch (MlcConfig::get(MlcConfig::API_COUNTRY)) {
             case MlcConfig::CZ_VERSION:
             case MlcConfig::CZ_TEST_VERSION:
                 $this->context->controller->addCSS(
-                    $this->_path . "/vendor/homecreditcz/widget-calculator/releases/CZ/dist/hc-calc/style/style.css"
+                    $this->_path . "/dist/hc-calc-CZ/style/style.css"
                 );
                 $this->context->controller->addJS(
-                    $this->_path . "/vendor/homecreditcz/widget-calculator/releases/CZ/dist/hc-calc/js/resize.js"
+                    $this->_path . "/dist/hc-calc-CZ/js/resize.js"
                 );
                 $this->context->controller->addJS(dirname(__FILE__) . "/views/js/appLoader-cz.js");
                 break;
             case MlcConfig::SK_VERSION:
             case MlcConfig::SK_TEST_VERSION:
                 $this->context->controller->addCSS(
-                    $this->_path . "/vendor/homecreditcz/widget-calculator/releases/SK/dist/hc-calc/style/style.css"
+                    $this->_path . "/dist/hc-calc-SK/style/style.css"
                 );
                 $this->context->controller->addJS(
-                    $this->_path . "/vendor/homecreditcz/widget-calculator/releases/SK/dist/hc-calc/js/resize.js"
+                    $this->_path . "/dist/hc-calc-SK/js/resize.js"
                 );
                 $this->context->controller->addJS($this->_path . "/views/js/appLoader-sk.js");
         }
@@ -151,18 +170,22 @@ class MyLoanConnector extends PaymentModule
             return false;
         }
 
+        $productId = $hookParams["product"]["id"];
+        $productPrice = \MyLoan\Tools::getProductPriceInMinorUnits($productId);
+        $productSetCode = \MyLoan\Tools::getProductSetCode($productId);
+
         $this->smarty->assign(array(
           "isCertified" => MlcConfig::get(MlcConfig::API_CERTIFIED),
           "hcLogo" => \MyLoan\Tools::getImagePath("hc-logo.svg"),
           "calcButton" => \MyLoan\Tools::getImagePath("hc-calculator.svg"),
-          "productId" => $hookParams["product"]["id"],
+          "productId" => $productId,
           "productPrice" => $productPrice,
-          "calcUrl" => MyLoan\Tools::genCalculatorUrl($productPrice),
+          "calcUrl" => MyLoan\Tools::genCalculatorUrl($productPrice, $productSetCode),
           "calcPostUrl" => Context::getContext()->link->getModuleLink(
               MlcConfig::MODULE_NAME,
               'payment'
           ),
-          "productSetCode" => \MlcConfig::get(\MlcConfig::API_PRODUCT_CODE),
+          "productSetCode" => $productSetCode,
           "apiKey" => \MlcConfig::get(\MlcConfig::API_CALC_KEY),
         ));
 
@@ -184,18 +207,20 @@ class MyLoanConnector extends PaymentModule
             $this->context->currency->iso_code
         );
 
+        $productSetCode = \MyLoan\Tools::getCartProductsSetCode($this->context->cart->getProducts());
+
         $this->context->controller->addCSS(dirname(__FILE__) . "/views/css/myloan.css");
 
         $this->context->smarty->assign(
             [
             "isCertified" => MlcConfig::get(MlcConfig::API_CERTIFIED),
             "loanOverview" => \MyLoan\Tools::getLoanOverview($cartOrderTotal),
-            "calcUrl" => \MyLoan\Tools::genCalculatorUrl($cartOrderTotal),
+            "calcUrl" => \MyLoan\Tools::genCalculatorUrl($cartOrderTotal, $productSetCode),
             "calcPostUrl" => Context::getContext()->link->getModuleLink(
                 MlcConfig::MODULE_NAME,
                 'payment'
             ),
-            "productSetCode" => \MlcConfig::get(\MlcConfig::API_PRODUCT_CODE),
+            "productSetCode" => $productSetCode,
             "apiKey" => \MlcConfig::get(\MlcConfig::API_CALC_KEY),
             'hcLogo' => \MyLoan\Tools::getImagePath("hc-logo.svg"),
             'cartOrderTotal' => $cartOrderTotal
@@ -269,7 +294,7 @@ class MyLoanConnector extends PaymentModule
                     $api = new \MyLoan\HomeCredit\RequestAPI();
                     $response = (array)$api->markOrderAsSent($loan->getApplicationId());
                 } catch (Exception $e) {
-                    \MyLoan\Tools::addMyError($this->l('State change error! Please contact Home Credit'));
+                    \MyLoan\Tools::addMyError($this->l('State change error! Please contact Home Credit', __CLASS__));
                 }
             } else {
                 if ($params["newOrderStatus"]->id == MlcConfig::get(MlcConfig::getIdOfOrderStateMapping(MyLoan\HomeCredit\OrderStates\ReadyToDeliveredState::ID))) {
@@ -277,14 +302,14 @@ class MyLoanConnector extends PaymentModule
                         $api = new \MyLoan\HomeCredit\RequestAPI();
                         $response = (array)$api->markOrderAsDelivered($loan->getApplicationId());
                     } catch (Exception $e) {
-                        \MyLoan\Tools::addMyError($this->l('State change error! Please contact Home Credit'));
+                        \MyLoan\Tools::addMyError($this->l('State change error! Please contact Home Credit', __CLASS__));
                     }
                 }
             }
 
             if (is_null($response) || array_key_exists("errors", $response)) {
                 \MyLoan\Tools::addMyError(
-                  $this->l("HomeCredit change order stare error") . ":" .
+                  $this->l("HomeCredit change order stare error", __CLASS__) . ":" .
                   $response["errors"][0]["message"]
                 );
             }
@@ -334,10 +359,10 @@ class MyLoanConnector extends PaymentModule
           "refreshLink" => $link,
           "cancelLink" => $cancelLink,
           "text" => [
-            "id" => $this->l("Id"). ": ",
-            "state" => $this->l("State"). ": ",
-            "downpayment" => $this->l("Downpayment"). ": ",
-            "button" => $this->l("Refresh")
+            "id" => $this->l("Id", __CLASS__). ": ",
+            "state" => $this->l("State", __CLASS__). ": ",
+            "downpayment" => $this->l("Downpayment", __CLASS__). ": ",
+            "button" => $this->l("Refresh", __CLASS__)
           ]
         ]);
 

@@ -55,7 +55,11 @@
     <script>
 
         $(document).ready(function () {
-
+            let body = document.querySelector('body');
+            let element = document.getElementById('infoModal');
+            if (!!body && !!element) {
+                body.appendChild(element);
+            }
             $('#hc-select-payment').click(function (e) {
 
                 if(e.originalEvent.target.id === "hc-info"){

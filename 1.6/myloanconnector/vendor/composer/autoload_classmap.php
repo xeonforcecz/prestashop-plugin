@@ -6,6 +6,7 @@ $vendorDir = dirname(dirname(__FILE__));
 $baseDir = dirname($vendorDir);
 
 return array(
+    'Composer\\InstalledVersions' => $vendorDir . '/composer/InstalledVersions.php',
     'HcApi\\HcApi' => $vendorDir . '/homecreditcz/hc-api/HcApi.php',
     'Loan' => $baseDir . '/classes/Loan.php',
     'MlcConfig' => $baseDir . '/classes/MlcConfig.php',

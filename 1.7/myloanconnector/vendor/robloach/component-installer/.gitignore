@@ -1,6 +1,4 @@
 vendor
 .idea
-nbproject
 .project
 composer.phar
-composer.lock
