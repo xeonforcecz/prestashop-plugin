@@ -77,7 +77,7 @@ class MlcConfig extends Configuration
     const REFERRAL_COOKIE_EXPIRE = 60*60*24*7;
 
     /**
-     * V˝chozÌ slevov· kategorie
+     * V√Ωchoz√≠ slevov√° kategorie
      */
     const WITHOUT_DISCOUNT = 0;
 
@@ -86,7 +86,7 @@ class MlcConfig extends Configuration
      */
     const API_CALC_KEY = self::MODULE_PREFIX . "API_CALC_KEY";
     /**
-     * Nainstalovan· verze modulu
+     * Nainstalovan√° verze modulu
      */
     const MODULE_VERSION = self::MODULE_PREFIX . "VERSION";
 
@@ -130,8 +130,8 @@ class MlcConfig extends Configuration
         array(
           "name" => [
               "en" => "Settings",
-              "cs" => "NastavenÌ",
-              "sk" => "NastavenÌ",
+              "cs" => "Nastaven√≠",
+              "sk" => "Nastaven√≠",
           ],
           "class_name" => "MyLoanConnectorSettings"
         )
@@ -139,7 +139,7 @@ class MlcConfig extends Configuration
     );
 
     /**
-     * Metoda kter· naisntaluje vöe pot¯ebnÈ
+     * Metoda kter√° naisntaluje v≈°e pot√∏ebn√©
      * @return bool
      */
     public static function install()
@@ -153,7 +153,7 @@ class MlcConfig extends Configuration
     }
 
     /**
-     * VloûÌ defaultnÌ nastavenÌ
+     * Vlo≈æ√≠ defaultn√≠ nastaven√≠
      * @return bool
      */
     public static function installDefault()
@@ -212,7 +212,7 @@ class MlcConfig extends Configuration
 
 
     /**
-     * Vytvo¯Ì datab·zi
+     * Vytvo√∏√≠ datab√°zi
      * @return bool
      */
     public static function createDatabaseTables()
@@ -248,7 +248,7 @@ class MlcConfig extends Configuration
     }
 
 
-    /** NastavÌ povolenÈ typy stav˘ objedn·vek podle volby v administraci modulu.
+    /** Nastav√≠ povolen√© typy stav√π objedn√°vek podle volby v administraci modulu.
      * @param int $type
      */
     public static function setExpeditionType($type = 1){
@@ -283,7 +283,7 @@ class MlcConfig extends Configuration
     }
 
     /**
-     * P¯id·nÌ sloupce do tabulky objedn·vek
+     * P√∏id√°n√≠ sloupce do tabulky objedn√°vek
      * @return bool
      */
     public static function alterDatabaseTables()
@@ -300,7 +300,7 @@ class MlcConfig extends Configuration
     }
 
     /**
-     * UloûenÌ konfigurace
+     * Ulo≈æen√≠ konfigurace
      * @return bool
      */
     public static function saveConfig()
@@ -385,7 +385,7 @@ class MlcConfig extends Configuration
     }
 
     /**
-     * ZÌsk·nÌ nastavenÌ
+     * Z√≠sk√°n√≠ nastaven√≠
      *
      * @param OrderStateManager $manager
      * @return array
@@ -462,7 +462,7 @@ class MlcConfig extends Configuration
     }
 
     /**
-     * VyzkouöÌ p¯ipojenÌ k Myloan
+     * Vyzkou≈°√≠ p√∏ipojen√≠ k Myloan
      * @return bool|string
      */
     public static function testHCApiConnection()
@@ -486,7 +486,7 @@ class MlcConfig extends Configuration
     }
 
     /**
-     * Zkontroluje povinn· pole
+     * Zkontroluje povinn√° pole
      * @param $mlcData
      * @return bool
      */
@@ -502,7 +502,7 @@ class MlcConfig extends Configuration
     }
 
     /**
-     * ZjistÌ jestli je modul spr·vnÏ nastaven
+     * Zjist√≠ jestli je modul spr√°vn√¨ nastaven
      * @return bool
      */
     public static function isModuleConfigured()
@@ -748,7 +748,7 @@ ORDER BY `name` ASC')
 
 
     /**
-     * Aktivuje poloûky menu p¯i povolenÌ pluginu
+     * Aktivuje polo≈æky menu p√∏i povolen√≠ pluginu
      * @param bool $force_all
      * @return bool
      */
@@ -761,7 +761,7 @@ ORDER BY `name` ASC')
     }
 
     /**
-     * Deaktivuje poloûky menu p¯i zak·z·nÌ pluginu
+     * Deaktivuje polo≈æky menu p√∏i zak√°z√°n√≠ pluginu
      * @param bool $force_all
      * @return bool
      */
@@ -774,7 +774,7 @@ ORDER BY `name` ASC')
     }
 
     /**
-     * Instaluje novÈ poloûky menu
+     * Instaluje nov√© polo≈æky menu
      * @param $class_name
      * @param $id_parent
      * @param $name
@@ -791,7 +791,7 @@ ORDER BY `name` ASC')
         $module = Module::getInstanceByName(self::MODULE_NAME);
 
         foreach (Language::getIsoIds(true) as $lang) {
-            $tab->name[$lang['id_lang']] = (string)$module->l($name, __CLASS__);
+            $tab->name[$lang['id_lang']] = (string)$module->l($name["en"], __CLASS__);
         }
 
         $tab->id_parent = $id_parent;
@@ -805,7 +805,7 @@ ORDER BY `name` ASC')
     }
 
     /**
-     * Instaluje vöechny poloûky menu
+     * Instaluje v≈°echny polo≈æky menu
      * @return bool
      */
     public static function installTabs()
@@ -828,7 +828,7 @@ ORDER BY `name` ASC')
     }
 
     /**
-     * Odinstaluje poloûku menu
+     * Odinstaluje polo≈æku menu
      * @return bool
      */
     private static function uninstallTab($tab_name){
@@ -844,7 +844,7 @@ ORDER BY `name` ASC')
     }
 
     /**
-     * Odinstaluje vöechny poloûky menu
+     * Odinstaluje v≈°echny polo≈æky menu
      * @return bool
      */
     public static function uninstallTabs()
