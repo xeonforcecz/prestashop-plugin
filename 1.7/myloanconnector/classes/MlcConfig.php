@@ -139,6 +139,22 @@ class MlcConfig extends Configuration
     );
 
     /**
+     * Nastavení požadovaných a volitelných položek na stránce s nastavením
+     */
+    CONST requiredFields = [
+        self::API_USER => true,
+        self::API_PASSWORD => true,
+        self::API_SECRETCODE => true,
+        self::API_PRODUCT_CODE => true,
+        self::API_DISCOUNT_PRODUCT_CODE => false,
+        self::DISCOUNT_UTM_STRING => false,
+        self::API_CALC_KEY => true,
+        self::API_CERTIFIED => true,
+        self::API_COUNTRY => true,
+        self::EXPORT_METHOD => true
+        ];
+
+    /**
      * Metoda která naisntaluje vše potøebné
      * @return bool
      */
@@ -492,8 +508,8 @@ class MlcConfig extends Configuration
      */
     public static function requiredFields($mlcData)
     {
-        foreach ($mlcData as $config) {
-            if ($config == null) {
+        foreach ($mlcData as $key => $value) {
+            if ($value == null && self::requiredFields[$key]) {
                 return false;
             }
         }
@@ -602,12 +618,14 @@ class MlcConfig extends Configuration
      */
     private static function generateInputs(OrderStateManager $manager, Module $module, Language $language)
     {
+
+
         $inputsToPrepend = [
           [
             'type' => 'select',
             'label' => $module->l('Country', __CLASS__),
             'name' => self::API_COUNTRY,
-            'required' => true,
+            'required' => self::requiredFields[self::API_COUNTRY],
             'options' => [
               'query' => array_map(function($id) use($module) {
                   return ['id' => $id, 'name' => $module->l($id, __CLASS__)];
@@ -621,49 +639,49 @@ class MlcConfig extends Configuration
             'label' => $module->l('Username', __CLASS__),
             'name' => self::API_USER,
             'size' => 20,
-            'required' => true
+            'required' => self::requiredFields[self::API_USER],
           ],
           [
             'type' => 'password',
             'label' => $module->l('Password', __CLASS__),
             'name' => self::API_PASSWORD,
             'size' => 64,
-            'required' => true,
+            'required' => self::requiredFields[self::API_PASSWORD],
           ],
           [
             'type' => 'password',
             'label' => $module->l('Secret code', __CLASS__),
             'name' => self::API_SECRETCODE,
             'size' => 64,
-            'required' => true,
+            'required' => self::requiredFields[self::API_SECRETCODE],
           ],
           [
             'type' => 'text',
             'label' => $module->l('Product code', __CLASS__),
             'name' => self::API_PRODUCT_CODE,
             'size' => 20,
-            'required' => true
+            'required' => self::requiredFields[self::API_PRODUCT_CODE],
           ],
           [
             'type' => 'text',
             'label' => $module->l('Discount product code', __CLASS__),
             'name' => self::API_DISCOUNT_PRODUCT_CODE,
             'size' => 20,
-            'required' => true
+            'required' => self::requiredFields[self::API_DISCOUNT_PRODUCT_CODE],
           ],
           [
             'type' => 'text',
             'label' => $module->l('Discount utm source string', __CLASS__),
             'name' => self::DISCOUNT_UTM_STRING,
             'size' => 20,
-            'required' => true
+            'required' => self::requiredFields[self::DISCOUNT_UTM_STRING],
           ],
           [
             'type' => 'text',
             'label' => $module->l('Calculator API key', __CLASS__),
             'name' => self::API_CALC_KEY,
             'size' => 20,
-            'required' => true
+            'required' => self::requiredFields[self::API_CALC_KEY],
           ]
         ];
         $inputsToAppend = [
@@ -671,7 +689,7 @@ class MlcConfig extends Configuration
             'type' => 'switch',
             'label' => $module->l('Are you certified Home Credit partner?', __CLASS__),
             'name' => self::API_CERTIFIED,
-            'required' => true,
+            'required' => self::requiredFields[self::API_CERTIFIED],
             'values' => [
               [
                 'id' => 'certified_1',
@@ -689,7 +707,7 @@ class MlcConfig extends Configuration
             'type' => 'switch',
             'label' => $module->l('Inform Home Credit when shipped? (Else when delivered.)', __CLASS__),
             'name' => self::EXPORT_METHOD,
-            'required' => true,
+            'required' => self::requiredFields[self::EXPORT_METHOD],
             'values' => [
               [
                 'id' => 'shipped_1',
