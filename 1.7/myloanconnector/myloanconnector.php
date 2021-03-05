@@ -166,7 +166,7 @@ class MyLoanConnector extends PaymentModule
         $context = \Context::getContext();
         $productPrice = \MyLoan\Tools::getProductPriceInMinorUnits($hookParams["product"]["id"]);
 
-        if (!\MyLoan\Tools::shouldHookModule( \Myloan\Tools::convertNumberFromMinorUnits($productPrice, $context->currency->iso_code))) {
+        if (!\MyLoan\Tools::shouldHookModule(false)) {
             return false;
         }
 
@@ -180,13 +180,14 @@ class MyLoanConnector extends PaymentModule
           "calcButton" => \MyLoan\Tools::getImagePath("hc-calculator.svg"),
           "productId" => $productId,
           "productPrice" => $productPrice,
-          "calcUrl" => MyLoan\Tools::genCalculatorUrl($productPrice, $productSetCode),
+          "calcUrl" => MyLoan\Tools::genCalculatorUrl("%price_placeholder%", $productSetCode),
           "calcPostUrl" => Context::getContext()->link->getModuleLink(
               MlcConfig::MODULE_NAME,
               'payment'
           ),
           "productSetCode" => $productSetCode,
           "apiKey" => \MlcConfig::get(\MlcConfig::API_CALC_KEY),
+          "minimalPrice" => array("CZK" => \Loan::MINIMAL_PRICE_CZK, "EUR" => \Loan::MINIMAL_PRICE_EUR)
         ));
 
         return $this->display(__FILE__, "calculator.tpl");
@@ -198,7 +199,8 @@ class MyLoanConnector extends PaymentModule
     public function hookPaymentOptions()
     {
         $cartOrderTotal = $this->context->cart->getOrderTotal();
-        if (!\MyLoan\Tools::shouldHookModule($cartOrderTotal) || !(\MlcConfig::testHCApiConnection() === true)) {
+
+        if (!\MyLoan\Tools::shouldHookModule($cartOrderTotal)) {
             return false;
         }
 

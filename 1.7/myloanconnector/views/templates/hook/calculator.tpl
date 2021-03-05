@@ -4,7 +4,7 @@
 *  @license    http://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
 *}
 
-<div class="box-security" id="hc-calc-button">
+<div class="box-security" id="hc-calc-button" style="display: none;">
     <a href="javascript:showCalc()">{l s='Installment calculator' mod='myloanconnector' }</a>
 </div>
 
@@ -13,11 +13,33 @@
 {/if}
 
 <script type="text/javascript">
+    let priceElement = document.getElementsByClassName("product-prices")[0];
+    let calculatorButton = document.getElementById("hc-calc-button");
+    let productPriceVariant = null;
+    let minimalPrices = {
+        'CZK': {$minimalPrice["CZK"]},
+        'EUR': {$minimalPrice["EUR"]}
+    };
+
+    setInterval(function () {
+
+        productPriceVariant = Math.round(parseFloat(priceElement.textContent.replace(/\s/g,'').replace(/,/g,'.'))*100);
+
+        if(productPriceVariant >= (minimalPrices["{$currency.iso_code}"] * 100)){
+            calculatorButton.style.display = "";
+        } else {
+            calculatorButton.style.display = "none";
+        }
+
+    }, 1000);
 
     function showCalc() {
+        let calcUrl = '{urldecode($calcUrl)}';
+        calcUrl = calcUrl.replace(/%price_placeholder%/g, productPriceVariant);
+
         {if $isCertified == true}
             let apiKey = '{$apiKey|escape:'quotes'}';
-            showHcCalc('{$productSetCode|escape:'htmlall':'UTF-8'}', {$productPrice|escape:'htmlall':'UTF-8'}, 0, false, '{$calcUrl|escape:'quotes'}', apiKey, processCalcResult);
+            showHcCalc('{$productSetCode|escape:'htmlall':'UTF-8'}', productPriceVariant, 0, false, calcUrl, apiKey, processCalcResult);
         {else}
             let dualScreenLeft = window.screenLeft != undefined ? window.screenLeft : window.screenX;
             let dualScreenTop = window.screenTop != undefined ? window.screenTop : window.screenY;
@@ -28,8 +50,8 @@
             let systemZoom = width / window.screen.availWidth;
             let left = (width - w) / 2 / systemZoom + dualScreenLeft;
             let top = (height - h) / 2 / systemZoom + dualScreenTop;
-            window.open(decodeURI(decodeURIComponent('{$calcUrl|escape:'url'}')), '_blank', 'toolbar=no, location=no, directories=no, status=no, menubar=no, copyhistory=no, width='+w+', height='+h+', top='+top+', left='+left);
-        {/if}
+            window.open(calcUrl, '_blank', 'toolbar=no, location=no, directories=no, status=no, menubar=no, copyhistory=no, width='+w+', height='+h+', top='+top+', left='+left);
+    {/if}
     }
 
     {if $isCertified == true}

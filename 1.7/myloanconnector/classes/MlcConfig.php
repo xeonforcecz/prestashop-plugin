@@ -141,18 +141,21 @@ class MlcConfig extends Configuration
     /**
      * Nastavení požadovaných a volitelných položek na stránce s nastavením
      */
-    CONST requiredFields = [
-        self::API_USER => true,
-        self::API_PASSWORD => true,
-        self::API_SECRETCODE => true,
-        self::API_PRODUCT_CODE => true,
-        self::API_DISCOUNT_PRODUCT_CODE => false,
-        self::DISCOUNT_UTM_STRING => false,
-        self::API_CALC_KEY => true,
-        self::API_CERTIFIED => true,
-        self::API_COUNTRY => true,
-        self::EXPORT_METHOD => true
-        ];
+
+    private static function getRequiredFieldsArray(){
+        return array(
+            self::API_USER => true,
+            self::API_PASSWORD => empty(MlcConfig::get(self::API_PASSWORD)),
+            self::API_SECRETCODE => empty(MlcConfig::get(self::API_SECRETCODE)),
+            self::API_PRODUCT_CODE => true,
+            self::API_DISCOUNT_PRODUCT_CODE => false,
+            self::DISCOUNT_UTM_STRING => false,
+            self::API_CALC_KEY => true,
+            self::API_CERTIFIED => true,
+            self::API_COUNTRY => true,
+            self::EXPORT_METHOD => true
+        );
+    }
 
     /**
      * Metoda která naisntaluje vše potøebné
@@ -323,6 +326,7 @@ class MlcConfig extends Configuration
     {
         $module = Module::getInstanceByName(self::MODULE_NAME);
         $context = \Context::getContext();
+        $checkConnection = false;
 
         if (!isset($context->employee) || !$context->employee->isLoggedBack()) {
             return false;
@@ -347,33 +351,65 @@ class MlcConfig extends Configuration
         }
 
         $mlcData = \MyLoan\Validate::getDataAndValidate($mlcValidate);
+        $ApiUserChanged = $mlcData[self::API_USER] !== MlcConfig::get(self::API_USER);
+        $credentialsNotProvided = empty($mlcData[self::API_PASSWORD]) || empty($mlcData[self::API_SECRETCODE]);
+
         if (!$mlcData) {
             return $module->displayError($module->l('Please make sure you filled all fields in correct format.', __CLASS__));
         }
 
+        if ($ApiUserChanged && $credentialsNotProvided){
+            return $module->displayError($module->l('Home Credit password and secret key are required when username is changed.', __CLASS__));
+        }
+
         $mlcData = self::generateOrderMapping($manager, $mlcData);
+
+        // Pokud bylo změněno jméno uživatele API
+        if($ApiUserChanged){
+            $checkConnection = true;
+        }
+
+        // Pokud už je heslo nastaveno a nebylo zadáno nové, nechat
+        if(self::getRequiredFieldsArray()[self::API_PASSWORD] === false && empty($mlcData[self::API_PASSWORD])){
+            unset($mlcData[self::API_PASSWORD]);
+        } else {
+            $checkConnection = true;
+        }
+
+        // Pokud už je tajný kód nastaven a nebyl zadán nový, nechat
+        if(self::getRequiredFieldsArray()[self::API_SECRETCODE] === false && empty($mlcData[self::API_SECRETCODE])) {
+            unset($mlcData[self::API_SECRETCODE]);
+        } else {
+            $checkConnection = true;
+        }
 
         if (!self::requiredFields($mlcData)) {
             return $module->displayError($module->l('Please fill in all the required fields.', __CLASS__));
         }
 
+        MlcConfig::setExpeditionType($mlcData[self::EXPORT_METHOD]);
+
         $endPointManager = EndPointManager::getInstance();
         $mlcData[self::API_URL] = $endPointManager->getApiUrl($mlcData[self::API_COUNTRY]);
         $mlcData[self::API_CALC_URL] = $mlcData[self::API_CERTIFIED] ?
-          $endPointManager->getApiCalcCertifiedUrl($mlcData[self::API_COUNTRY]) :
-          $endPointManager->getApiCalcPublicUrl($mlcData[self::API_COUNTRY]);
-
-        MlcConfig::setExpeditionType($mlcData[self::EXPORT_METHOD]);
+            $endPointManager->getApiCalcCertifiedUrl($mlcData[self::API_COUNTRY]) :
+            $endPointManager->getApiCalcPublicUrl($mlcData[self::API_COUNTRY]);
 
         if (!self::updateValues($mlcData)) {
             return $module->displayError($module->l('An error occurred while updating your configuration. Please try again.', __CLASS__));
         }
 
-        if (($testApi = self::testHCApiConnection()) !== true) {
-            return $module->displayError($testApi);
+        // Ověřit spojení s HC API
+        if($checkConnection === true) {
+
+            if (($testApi = self::testHCApiConnection()) !== true) {
+                return $module->displayError($testApi);
+            } else {
+                return $module->displayConfirmation($module->l('Connection to Home Credit MyLoan API was successful!', __CLASS__));
+            }
         }
 
-        return $module->displayConfirmation($module->l('Connection to Home Credit MyLoan API was successful!', __CLASS__));
+        return $module->displayConfirmation($module->l('Settings was successfully saved!', __CLASS__));
     }
 
 
@@ -509,7 +545,7 @@ class MlcConfig extends Configuration
     public static function requiredFields($mlcData)
     {
         foreach ($mlcData as $key => $value) {
-            if ($value == null && self::requiredFields[$key]) {
+            if ($value == null && self::getRequiredFieldsArray()[$key]) {
                 return false;
             }
         }
@@ -625,7 +661,7 @@ class MlcConfig extends Configuration
             'type' => 'select',
             'label' => $module->l('Country', __CLASS__),
             'name' => self::API_COUNTRY,
-            'required' => self::requiredFields[self::API_COUNTRY],
+            'required' => self::getRequiredFieldsArray()[self::API_COUNTRY],
             'options' => [
               'query' => array_map(function($id) use($module) {
                   return ['id' => $id, 'name' => $module->l($id, __CLASS__)];
@@ -639,49 +675,49 @@ class MlcConfig extends Configuration
             'label' => $module->l('Username', __CLASS__),
             'name' => self::API_USER,
             'size' => 20,
-            'required' => self::requiredFields[self::API_USER],
+            'required' => self::getRequiredFieldsArray()[self::API_USER],
           ],
           [
             'type' => 'password',
             'label' => $module->l('Password', __CLASS__),
             'name' => self::API_PASSWORD,
             'size' => 64,
-            'required' => self::requiredFields[self::API_PASSWORD],
+            'required' => self::getRequiredFieldsArray()[self::API_PASSWORD],
           ],
           [
             'type' => 'password',
             'label' => $module->l('Secret code', __CLASS__),
             'name' => self::API_SECRETCODE,
             'size' => 64,
-            'required' => self::requiredFields[self::API_SECRETCODE],
+            'required' => self::getRequiredFieldsArray()[self::API_SECRETCODE],
           ],
           [
             'type' => 'text',
             'label' => $module->l('Product code', __CLASS__),
             'name' => self::API_PRODUCT_CODE,
             'size' => 20,
-            'required' => self::requiredFields[self::API_PRODUCT_CODE],
+            'required' => self::getRequiredFieldsArray()[self::API_PRODUCT_CODE],
           ],
           [
             'type' => 'text',
             'label' => $module->l('Discount product code', __CLASS__),
             'name' => self::API_DISCOUNT_PRODUCT_CODE,
             'size' => 20,
-            'required' => self::requiredFields[self::API_DISCOUNT_PRODUCT_CODE],
+            'required' => self::getRequiredFieldsArray()[self::API_DISCOUNT_PRODUCT_CODE],
           ],
           [
             'type' => 'text',
             'label' => $module->l('Discount utm source string', __CLASS__),
             'name' => self::DISCOUNT_UTM_STRING,
             'size' => 20,
-            'required' => self::requiredFields[self::DISCOUNT_UTM_STRING],
+            'required' => self::getRequiredFieldsArray()[self::DISCOUNT_UTM_STRING],
           ],
           [
             'type' => 'text',
             'label' => $module->l('Calculator API key', __CLASS__),
             'name' => self::API_CALC_KEY,
             'size' => 20,
-            'required' => self::requiredFields[self::API_CALC_KEY],
+            'required' => self::getRequiredFieldsArray()[self::API_CALC_KEY],
           ]
         ];
         $inputsToAppend = [
@@ -689,7 +725,7 @@ class MlcConfig extends Configuration
             'type' => 'switch',
             'label' => $module->l('Are you certified Home Credit partner?', __CLASS__),
             'name' => self::API_CERTIFIED,
-            'required' => self::requiredFields[self::API_CERTIFIED],
+            'required' => self::getRequiredFieldsArray()[self::API_CERTIFIED],
             'values' => [
               [
                 'id' => 'certified_1',
@@ -707,7 +743,7 @@ class MlcConfig extends Configuration
             'type' => 'switch',
             'label' => $module->l('Inform Home Credit when shipped? (Else when delivered.)', __CLASS__),
             'name' => self::EXPORT_METHOD,
-            'required' => self::requiredFields[self::EXPORT_METHOD],
+            'required' => self::getRequiredFieldsArray()[self::EXPORT_METHOD],
             'values' => [
               [
                 'id' => 'shipped_1',

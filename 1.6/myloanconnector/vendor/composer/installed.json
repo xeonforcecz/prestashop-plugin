@@ -103,6 +103,7 @@
             "support": {
                 "source": "https://github.com/Gta-Cool/jquery-cookie/tree/feature/composer"
             },
+            "abandoned": true,
             "install-path": "../components/jquery-cookie"
         },
         {

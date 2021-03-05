@@ -189,11 +189,12 @@ class Tools
      * @param string $productPrice
      * @return bool
      */
-    public static function shouldHookModule($productPrice = "")
+    public static function shouldHookModule($productPrice = false)
     {
+        $isPriceValid = (!$productPrice) || self::productHasMinimalPrice($productPrice);
         return
           \MlcConfig::isModuleConfigured() &&
-          self::productHasMinimalPrice($productPrice) &&
+          $isPriceValid &&
           self::shopHasAllowedCurrency() &&
           in_array(\Tools::getValue('controller'), ['product', 'order', 'payment', 'orderopc', 'default']);
     }

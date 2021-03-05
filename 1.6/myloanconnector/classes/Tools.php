@@ -185,11 +185,12 @@ class Tools
      * @param string $productPrice
      * @return bool
      */
-    public static function shouldHookModule($productPrice = "")
+    public static function shouldHookModule($productPrice = false)
     {
+        $isPriceValid = (!$productPrice) || self::productHasMinimalPrice($productPrice);
         return
           \MlcConfig::isModuleConfigured() &&
-          self::productHasMinimalPrice($productPrice) &&
+          $isPriceValid &&
           self::shopHasAllowedCurrency() &&
           in_array(\Tools::getValue('controller'), ['product', 'order', 'payment', 'orderopc']);
     }
@@ -203,6 +204,7 @@ class Tools
     {
         $context = \Context::getContext();
         $product = new \Product($productId);
+        //var_dump($product->getAttributesResume($context->language->id));
         return \MyLoan\Tools::convertNumberToMinorUnits($product->getPrice(), $context->currency->iso_code);
     }
 
@@ -342,6 +344,7 @@ class Tools
         );
 
         if (is_array($loanCookie) && array_key_exists("productPrice", $loanCookie)) {
+            echo($cartOrderTotal ."==". $loanCookie['productPrice']);
             return $cartOrderTotal == $loanCookie['productPrice'];
         } else {
             return false;

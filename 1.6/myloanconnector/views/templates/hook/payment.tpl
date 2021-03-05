@@ -7,7 +7,7 @@
 <div class="row" id="hc-confirm-payment-method">
     <div class="col-xs-12">
         <p class="payment_module" id="hc-select-payment">
-            <a class="cheque" href="{$actionUrl}">
+            <a class="cheque"> <!-- href="{$actionUrl}"-->
                 <img src="{$hcLogo|escape:'quotes'}" height="30"/>
                 <span>
                 {if !empty($loanOverview)}
@@ -66,6 +66,11 @@
                     showInfo();
                     return;
                 }
+                console.info(e.originalEvent.target);
+                if(e.originalEvent.target.id === "hc-info"){
+                    showInfo();
+                    return;
+                }
 
                 if (isLoanCookieValid()) {
                     if(e.originalEvent.target.id === "hc-change-payment"){
@@ -100,6 +105,7 @@
         }
 
         function isLoanCookieValid() {
+            console.info(!$.cookie("hc_calculator"));
             if (!$.cookie("hc_calculator")) {
                 return false
             }

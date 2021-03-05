@@ -12,9 +12,11 @@ $_MODULE['<{myloanconnector}prestashop>myloanconnector_490aa6e856ccf208a054389e4
 $_MODULE['<{myloanconnector}prestashop>myloanconnector_31f4d8bc8faa61f73bbf8e1d39262d59'] = 'Při změně stavu došlo k chybě! Prosím kontaktujte Home Credit';
 $_MODULE['<{myloanconnector}prestashop>myloanconnector_9b7e26da1e8a35f3f01bc10c092eeea2'] = 'Akontace';
 $_MODULE['<{myloanconnector}prestashop>mlcconfig_9810fe391f2e0a0d0644004e1073321e'] = 'Prosím ujistěte se, že jste vyplnil pole ve správném formátu.';
+$_MODULE['<{myloanconnector}prestashop>mlcconfig_12f77b4b4124af74fe1cb8f702931d30'] = 'Položky heslo a tajný klíč jsou požadovány při změně uživatelského jména.';
 $_MODULE['<{myloanconnector}prestashop>mlcconfig_959c96ec640d353311dd9763d57daad6'] = 'Prosím vyplňte všechny povinná pole.';
 $_MODULE['<{myloanconnector}prestashop>mlcconfig_045216628c9d6881f0549278a78d87e9'] = 'Nastala chyba během aktualizace konfigurace. Prosím zkuste to znovu.';
 $_MODULE['<{myloanconnector}prestashop>mlcconfig_b95b38dbdb2d5ea8e2a2d9336b7d669f'] = 'Připojení do Home Credit MyLoan API bylo úspěšné.';
+$_MODULE['<{myloanconnector}prestashop>mlcconfig_cf486d468a1f83d6621b2a635c893eaa'] = 'Nastavení bylo změněno.';
 $_MODULE['<{myloanconnector}prestashop>mlcconfig_757cd975d284a7962bff21521c83b2d4'] = 'Home Credit MyLoan konfigurace';
 $_MODULE['<{myloanconnector}prestashop>mlcconfig_c9cc8cce247e49bae79f15173ce97354'] = 'Uložit';
 $_MODULE['<{myloanconnector}prestashop>mlcconfig_9af86970767dfbabb64464795294a34c'] = 'Došlo k chybě během připojení na Home Credit!';
