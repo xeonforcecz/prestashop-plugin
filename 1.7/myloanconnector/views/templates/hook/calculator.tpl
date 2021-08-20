@@ -4,7 +4,7 @@
 *  @license    http://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
 *}
 
-<div class="box-security" id="hc-calc-button" style="display: none;">
+<div id="hc-calc-button" style="display: none; text-align: center;">
     <a href="javascript:showCalc()">{l s='Installment calculator' mod='myloanconnector' }</a>
 </div>
 
@@ -20,12 +20,28 @@
         'CZK': {$minimalPrice["CZK"]},
         'EUR': {$minimalPrice["EUR"]}
     };
+    let isoCode; 
+
+    if(typeof currency === 'undefined' && typeof currencySign !== 'undefined') {
+        
+        switch(currencySign){
+            case '€': 
+                isoCode = "EUR";
+            break;
+            default: 
+                isoCode = "CZK";
+            break;
+        }
+
+    } else {
+        isoCode = "{$currency.iso_code}";
+    }
 
     setInterval(function () {
 
         productPriceVariant = Math.round(parseFloat(priceElement.textContent.replace(/\s/g,'').replace(/,/g,'.'))*100);
 
-        if(productPriceVariant >= (minimalPrices["{$currency.iso_code}"] * 100)){
+        if(productPriceVariant >= (minimalPrices[isoCode] * 100)){
             calculatorButton.style.display = "";
         } else {
             calculatorButton.style.display = "none";
@@ -34,7 +50,7 @@
     }, 1000);
 
     function showCalc() {
-        let calcUrl = '{urldecode($calcUrl)}';
+        let calcUrl = decodeURI(decodeURIComponent('{$calcUrl|escape:'url'}'));
         calcUrl = calcUrl.replace(/%price_placeholder%/g, productPriceVariant);
 
         {if $isCertified == true}

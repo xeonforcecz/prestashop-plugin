@@ -1,21 +1,25 @@
 {
+    "_readme": [
+        "This file locks the dependencies of your project to a known state",
+        "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
+        "This file is @generated automatically"
+    ],
+    "content-hash": "f7b3ff81f8cd45b2aa07a726e95e76d1",
     "packages": [
         {
             "name": "components/jquery",
             "version": "dev-master",
-            "version_normalized": "dev-master",
             "source": {
                 "type": "git",
                 "url": "https://github.com/components/jquery.git",
-                "reference": "6cf38ee1fd04b6adf8e7dda161283aa35be818c3"
+                "reference": "b33e8f0f9a1cb2ae390cf05d766a900b53d2125b"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/components/jquery/zipball/6cf38ee1fd04b6adf8e7dda161283aa35be818c3",
-                "reference": "6cf38ee1fd04b6adf8e7dda161283aa35be818c3",
+                "url": "https://api.github.com/repos/components/jquery/zipball/b33e8f0f9a1cb2ae390cf05d766a900b53d2125b",
+                "reference": "b33e8f0f9a1cb2ae390cf05d766a900b53d2125b",
                 "shasum": ""
             },
-            "time": "2021-03-20T19:13:42+00:00",
             "default-branch": true,
             "type": "component",
             "extra": {
@@ -32,7 +36,6 @@
                     ]
                 }
             },
-            "installation-source": "source",
             "notification-url": "https://packagist.org/downloads/",
             "license": [
                 "MIT"
@@ -51,12 +54,11 @@
                 "source": "https://github.com/jquery/jquery",
                 "wiki": "http://docs.jquery.com/"
             },
-            "install-path": "../components/jquery"
+            "time": "2020-05-05T13:21:02+00:00"
         },
         {
             "name": "components/jquery-cookie",
             "version": "1.4.1.2",
-            "version_normalized": "1.4.1.2",
             "source": {
                 "type": "git",
                 "url": "https://github.com/Gta-Cool/jquery-cookie.git",
@@ -72,7 +74,6 @@
                 "components/jquery": "*",
                 "robloach/component-installer": "*"
             },
-            "time": "2014-07-02T18:35:35+00:00",
             "type": "component",
             "extra": {
                 "component": {
@@ -81,7 +82,6 @@
                     ]
                 }
             },
-            "installation-source": "dist",
             "notification-url": "https://packagist.org/downloads/",
             "license": [
                 "MIT"
@@ -103,13 +103,11 @@
             "support": {
                 "source": "https://github.com/Gta-Cool/jquery-cookie/tree/feature/composer"
             },
-            "abandoned": true,
-            "install-path": "../components/jquery-cookie"
+            "time": "2014-07-02T18:35:35+00:00"
         },
         {
             "name": "homecreditcz/hc-api",
             "version": "dev-master",
-            "version_normalized": "dev-master",
             "source": {
                 "type": "git",
                 "url": "https://mycatteam.visualstudio.com/hc-prestashop/_git/HcApi",
@@ -118,10 +116,8 @@
             "require": {
                 "ext-json": "*"
             },
-            "time": "2019-11-28T16:42:54+00:00",
             "default-branch": true,
             "type": "library",
-            "installation-source": "source",
             "autoload": {
                 "classmap": [
                     "./"
@@ -137,24 +133,20 @@
                 }
             ],
             "description": "HomeCredit api library.",
-            "install-path": "../homecreditcz/hc-api"
+            "time": "2019-11-28T16:42:54+00:00"
         },
         {
             "name": "homecreditcz/widget-calculator",
             "version": "master",
-            "version_normalized": "dev-master",
             "dist": {
                 "type": "zip",
                 "url": "https://github.com/homecreditcz/widget-calculator/archive/master.zip"
             },
-            "type": "library",
-            "installation-source": "dist",
-            "install-path": "../homecreditcz/widget-calculator"
+            "type": "library"
         },
         {
             "name": "kriswallsmith/assetic",
             "version": "dev-master",
-            "version_normalized": "dev-master",
             "source": {
                 "type": "git",
                 "url": "https://github.com/kriswallsmith/assetic.git",
@@ -195,7 +187,6 @@
                 "ptachoire/cssembed": "Assetic provides the integration with phpcssembed to embed data uris",
                 "twig/twig": "Assetic provides the integration with the Twig templating engine"
             },
-            "time": "2020-10-13T13:24:01+00:00",
             "default-branch": true,
             "type": "library",
             "extra": {
@@ -203,7 +194,6 @@
                     "dev-master": "1.4-dev"
                 }
             },
-            "installation-source": "source",
             "autoload": {
                 "psr-0": {
                     "Assetic": "src/"
@@ -234,12 +224,11 @@
                 "issues": "https://github.com/kriswallsmith/assetic/issues",
                 "source": "https://github.com/kriswallsmith/assetic/tree/master"
             },
-            "install-path": "../kriswallsmith/assetic"
+            "time": "2020-10-13T13:24:01+00:00"
         },
         {
             "name": "robloach/component-installer",
             "version": "0.0.12",
-            "version_normalized": "0.0.12.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/RobLoach/component-installer.git",
@@ -258,12 +247,10 @@
             "require-dev": {
                 "composer/composer": "1.*"
             },
-            "time": "2013-08-31T23:46:48+00:00",
             "type": "composer-installer",
             "extra": {
                 "class": "ComponentInstaller\\Installer"
             },
-            "installation-source": "dist",
             "autoload": {
                 "psr-0": {
                     "ComponentInstaller": "src/"
@@ -286,12 +273,11 @@
                 "source": "https://github.com/RobLoach/component-installer/tree/master"
             },
             "abandoned": "oomphinc/composer-installers-extender",
-            "install-path": "../robloach/component-installer"
+            "time": "2013-08-31T23:46:48+00:00"
         },
         {
             "name": "symfony/process",
             "version": "3.4.x-dev",
-            "version_normalized": "3.4.9999999.9999999-dev",
             "source": {
                 "type": "git",
                 "url": "https://github.com/symfony/process.git",
@@ -306,9 +292,7 @@
             "require": {
                 "php": "^5.5.9|>=7.0.8"
             },
-            "time": "2020-10-24T10:57:07+00:00",
             "type": "library",
-            "installation-source": "source",
             "autoload": {
                 "psr-4": {
                     "Symfony\\Component\\Process\\": ""
@@ -350,9 +334,21 @@
                     "type": "tidelift"
                 }
             ],
-            "install-path": "../symfony/process"
+            "time": "2020-10-24T10:57:07+00:00"
         }
     ],
-    "dev": true,
-    "dev-package-names": []
+    "packages-dev": [],
+    "aliases": [],
+    "minimum-stability": "dev",
+    "stability-flags": [],
+    "prefer-stable": false,
+    "prefer-lowest": false,
+    "platform": {
+        "ext-json": "*"
+    },
+    "platform-dev": [],
+    "platform-overrides": {
+        "php": "5.6"
+    },
+    "plugin-api-version": "2.0.0"
 }

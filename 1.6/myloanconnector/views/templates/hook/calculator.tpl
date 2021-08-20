@@ -4,7 +4,7 @@
 *  @license    http://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
 *}
 
-<div class="box-security" id="hc-calc-button" style="display: none;">
+<div id="hc-calc-button" style="display: none; text-align: center;">
     <a href="javascript:showCalc()">{l s='Installment calculator' mod='myloanconnector' }</a>
 </div>
 
@@ -17,12 +17,29 @@
     let calculatorButton = document.getElementById("hc-calc-button");
     let productPriceVariant = null;
     let minimalPrices = {json_encode($minimalPrice)};
+    let isoCode; 
+
+    if(typeof currency === 'undefined' && typeof currencySign !== 'undefined') {
+        
+        switch(currencySign){
+            case '€': 
+                isoCode = "EUR";
+            break;
+            default: 
+                isoCode = "CZK";
+            break;
+        }
+
+    } else {
+        isoCode = currency.iso_code;
+    }
+
 
     let observer = new MutationObserver(function () {
 
         productPriceVariant = Math.round(parseFloat(priceElement.textContent.replace(/ /g,'').replace(/,/g,'.'))*100);
 
-        if(productPriceVariant >= (minimalPrices[currency.iso_code] * 100)){
+        if(productPriceVariant >= (minimalPrices[isoCode] * 100)){
             calculatorButton.style.display = "";
         } else {
             calculatorButton.style.display = "none";
@@ -58,7 +75,6 @@
     {if $isCertified == true}
 
         function processCalcResult(calcResult) {
-            alert("done");
             //ajaxCart.add({$productId|escape:'htmlall':'UTF-8'}, null, false, this);
             calcResult.productPrice = productPriceVariant;
             $.post( "{$calcPostUrl|escape:'quotes'}", {literal}{hc_calculator: JSON.stringify(calcResult)});{/literal}
