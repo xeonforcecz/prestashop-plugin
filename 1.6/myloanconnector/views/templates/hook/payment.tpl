@@ -15,9 +15,15 @@
                     {if !empty($loanOverview)}
                         <span>({l s='Payment'  mod='myloanconnector'} {$loanOverview|escape:'htmlall':'UTF-8'})</span>
                     {/if}
-                    <span id="hc-change-payment" style="padding: 8px;">{l s='Change calculaton' mod='myloanconnector' }</span>
-                {else}
-                    <span>
+
+                        {if $isCertified == true}
+                            <span id="hc-change-payment" onclick="showCalc()" style="padding: 8px;">{l s='Change calculaton' mod='myloanconnector' }</span>
+                        {else}
+                            <span id="hc-change-payment" style="padding: 8px;">{l s='Change calculaton' mod='myloanconnector' }</span>
+                        {/if}
+
+                    {else}
+                    <span onclick="showCalc()">
                         {l s='Buy in installments redirect' mod='myloanconnector' }
                     </span>
                 {/if}
@@ -28,6 +34,9 @@
                     </span>
                 </span>
 
+                {if $isCertified == true}
+                    {include "./hc-calculator-dialog.tpl"}
+                {/if}
             </a>
         </p>
     </div>
@@ -51,7 +60,7 @@
 </div>
 
 {if $isCertified == true}
-    {include "./hc-calculator-dialog.tpl"}
+
     <script>
 
         $(document).ready(function () {

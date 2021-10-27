@@ -49,9 +49,13 @@
 
     observer.observe(priceElement, { childList: true });
 
+    function htmlDecode(input) {
+        var doc = new DOMParser().parseFromString(input, "text/html");
+        return doc.documentElement.textContent;
+    }
 
     function showCalc() {
-        let calcUrl = '{urldecode($calcUrl)}';
+        let calcUrl = htmlDecode('{urldecode($calcUrl)}');
         calcUrl = calcUrl.replace(/%price_placeholder%/g, productPriceVariant);
 
         {if $isCertified == true}

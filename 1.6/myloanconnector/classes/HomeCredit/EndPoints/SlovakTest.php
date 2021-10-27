@@ -14,7 +14,7 @@ class SlovakTest implements IEndPoint
     private $id = "SK_TEST";
     private $apiUrl = "https://apisk-test.homecredit.net/verdun-train/";
     private $apiCalcUrl = "https://apisk-test.homecredit.net/verdun-train/public/v1/calculator/";
-    private $apiPublicCalcUrl = "https://kalkulacka-sk.train.hciapp.net/";
+    private $apiPublicCalcUrl = "https://kalkulacka-sk.train.hccs.net/";
 
     public function getId()
     {

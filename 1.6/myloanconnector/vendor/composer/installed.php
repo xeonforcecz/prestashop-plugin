@@ -19,7 +19,7 @@
       array (
         0 => '9999999-dev',
       ),
-      'reference' => '6cf38ee1fd04b6adf8e7dda161283aa35be818c3',
+      'reference' => 'b33e8f0f9a1cb2ae390cf05d766a900b53d2125b',
     ),
     'components/jquery-cookie' => 
     array (

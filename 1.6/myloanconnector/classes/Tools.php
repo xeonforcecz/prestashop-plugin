@@ -344,7 +344,6 @@ class Tools
         );
 
         if (is_array($loanCookie) && array_key_exists("productPrice", $loanCookie)) {
-            echo($cartOrderTotal ."==". $loanCookie['productPrice']);
             return $cartOrderTotal == $loanCookie['productPrice'];
         } else {
             return false;
