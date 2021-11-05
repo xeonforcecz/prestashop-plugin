@@ -49,8 +49,13 @@
 
     }, 1000);
 
+    function htmlDecode(input) {
+        var doc = new DOMParser().parseFromString(input, "text/html");
+        return doc.documentElement.textContent;
+    }
+
     function showCalc() {
-        let calcUrl = decodeURI(decodeURIComponent('{$calcUrl|escape:'url'}'));
+        let calcUrl = htmlDecode(decodeURI(decodeURIComponent('{$calcUrl|escape:'url'}')));
         calcUrl = calcUrl.replace(/%price_placeholder%/g, productPriceVariant);
 
         {if $isCertified == true}
