@@ -234,7 +234,11 @@ class Tools
 
         $isDiscounted = (int)$productDiscountType !== (int)\MlcConfig::WITHOUT_DISCOUNT;
         $isReferral = (int)$productDiscountReferral !== (int)\MlcConfig::WITHOUT_DISCOUNT;
-        $isReferralActive = $cookie->$name === \MlcConfig::get(\MlcConfig::DISCOUNT_UTM_STRING);
+
+        // check if referral is in cookie data or in GET parameters
+        $isReferralActive =
+            $cookie->$name === \MlcConfig::get(\MlcConfig::DISCOUNT_UTM_STRING) ||
+            \Tools::getValue(\MlcConfig::REFERRAL_COOKIE_NAME) === \MlcConfig::get(\MlcConfig::DISCOUNT_UTM_STRING);
 
         if($isDiscounted || ($isReferral && $isReferralActive)){
             $productSetCode = \MlcConfig::get(\MlcConfig::API_DISCOUNT_PRODUCT_CODE);
