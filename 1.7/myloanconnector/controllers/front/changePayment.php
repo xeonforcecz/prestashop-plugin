@@ -42,7 +42,7 @@ class MyLoanConnectorChangePaymentModuleFrontController extends PaymentMethods
 
     protected function paymentMethod()
     {
-        if ($this->order->current_state != MlcConfig::get(\MlcConfig::getIdOfOrderStateMapping(\MyLoan\HomeCredit\OrderStates\RejectedState::ID)) {
+        if ($this->order->current_state != MlcConfig::get("HC_REJECTED")) {
             $this->showMessage("Order is not was not denied by HC. Can't change payment method.", "danger");
             return;
         }

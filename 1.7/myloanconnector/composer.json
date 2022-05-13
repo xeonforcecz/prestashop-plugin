@@ -1,15 +1,16 @@
 {
     "name": "hnconsulting/myloan-connector",
-    "version": "1.0.2",
     "description": "Homecredit connector modul pro prestashop.",
     "type": "project",
     "minimum-stability": "dev",
+    
     "config": {
         "platform":{
             "php":"5.6"
         },
         "prepend-autoloader": false
     },
+    
     "repositories": {
         "1": {
             "type": "package",

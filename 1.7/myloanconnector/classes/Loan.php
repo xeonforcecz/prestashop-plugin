@@ -36,7 +36,7 @@ class Loan extends ObjectModel
     const CANCELLED_NOT_PAID = 'CANCELLED_NOT_PAID';
 
     const MINIMAL_PRICE_CZK = "1000";
-    const MINIMAL_PRICE_EUR = "40";
+    const MINIMAL_PRICE_EUR = "50";
 
     /**
      * @see ObjectModel::$definition

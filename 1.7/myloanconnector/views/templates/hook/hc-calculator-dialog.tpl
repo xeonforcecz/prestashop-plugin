@@ -9,8 +9,8 @@
         <div class="hc-modal__dialog">
             <div class="hc-modal__content">
                 <div id="hc-modal-header" class="hc-modal__header">
-                    <span id="hc-close-button" class="hc-modal__close"
-                       onclick="document.getElementById('hc-calc-modal').style.display = 'none'"></span>
+                    <a id="hc-close-button" href="JavaScript:void(0);" class="hc-modal__close"
+                       onclick="document.getElementById('hc-calc-modal').style.display = 'none'"></a>
                     <div class="hc-modal__logo">
                         <img src="{$hcLogo|escape:'quotes'}"
                              alt="logo">

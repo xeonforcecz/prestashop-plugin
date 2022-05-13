@@ -101,7 +101,7 @@ function hcCalcloaded(productSetCode, price, downPayment, fixDownPayment, dataCa
   var script = doc.createElement('script');
   script.charset = 'UTF-8';
   script.type = 'text/javascript';
-  script.src = path + 'js/app.js';
+  script.src = path + 'hc-calc/js/app.js';
   body.appendChild(script);
 
   var appContainer = doc.createElement('div');
@@ -109,7 +109,7 @@ function hcCalcloaded(productSetCode, price, downPayment, fixDownPayment, dataCa
   wrapper.appendChild(appContainer);
 
   var resizeScript = doc.createElement('script');
-  resizeScript.src = path + 'js/resize.contentWindow.js';
+  resizeScript.src = path + 'hc-calc/js/resize.contentWindow.js';
   body.appendChild(resizeScript);
 
   var callbackScript = doc.createElement('script');

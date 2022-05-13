@@ -51,7 +51,7 @@ class AuthAPI
     }
 
     /**
-     * Vytvo≈ô√≠ komunikaƒçn√≠ t≈ô√≠du z OneClickApi
+     * Vytvo¯Ì komunikaËnÌ t¯Ìdu z OneClickApi
      * @return HcApi
      * @throws PrestaShopModuleException
      */
@@ -68,7 +68,7 @@ class AuthAPI
     }
 
     /**
-     * Zjist√≠ jestli jsem p≈ôihl√°≈°en√Ω do Myloan
+     * ZjistÌ jestli jsem p¯ihl·öen˝ do Myloan
      * @return bool
      * @throws PrestaShopModuleException
      */
@@ -81,7 +81,7 @@ class AuthAPI
     }
 
     /**
-     * Vr√°t√≠ adresu API
+     * Vr·tÌ adresu API
      * @return string
      */
     public function getApiAddress()
@@ -90,7 +90,7 @@ class AuthAPI
     }
 
     /**
-     * Nastav√≠ adresu API
+     * NastavÌ adresu API
      * @param string $apiAddress
      */
     public function setApiAddress($apiAddress)
@@ -99,7 +99,7 @@ class AuthAPI
     }
 
     /**
-     * Vrat√≠ u≈æivatele pro Myloan
+     * VratÌ uûivatele pro Myloan
      * @return string
      */
     public function getApiUser()
@@ -108,7 +108,7 @@ class AuthAPI
     }
 
     /**
-     * Nastav√≠ u≈æivatele pro Myloan
+     * NastavÌ uûivatele pro Myloan
      * @param string $apiUser
      */
     public function setApiUser($apiUser)
@@ -117,7 +117,7 @@ class AuthAPI
     }
 
     /**
-     * Vr√°t√≠ heslo pro Myloan
+     * Vr·tÌ heslo pro Myloan
      * @return string
      */
     public function getApiPassword()
@@ -126,7 +126,7 @@ class AuthAPI
     }
 
     /**
-     * Nastav√≠ heslo pro Myloan
+     * NastavÌ heslo pro Myloan
      * @param string $apiPassword
      */
     public function setApiPassword($apiPassword)

@@ -16,7 +16,6 @@ use MyLoan\HomeCredit\OrderStates\ReadyToDeliveredState;
 use MyLoan\HomeCredit\OrderStates\ReadyToDeliveringState;
 use MyLoan\HomeCredit\OrderStates\ReadyToShippedState;
 use MyLoan\HomeCredit\OrderStates\RejectedState;
-use MyLoan\HomeCredit\OrderStates\UnclassifiedState;
 use MyLoan\Tools;
 use Order;
 use PrestaShopModuleException;
@@ -97,14 +96,9 @@ class ResponseAPI
         $order = new Order($order_id);
         $managedState = self::transformStateReasonToManagedState($stateReason);
 
-        if (MlcConfig::hasKey(MlcConfig::getIdOfOrderStateMapping($managedState))) {
-            $newState = MlcConfig::get(MlcConfig::getIdOfOrderStateMapping($managedState));
-        } elseif (!MlcConfig::isOrderStateGenerated(UnclassifiedState::ID)) {
-            $newState = MlcConfig::get(MlcConfig::getIdOfOrderStateMapping(UnclassifiedState::ID));
-        } else {
-            $newState = MlcConfig::generateNewOrderState((new OrderStateManager)->getState(UnclassifiedState::ID));
-            MlcConfig::updateValue(UnclassifiedState::ID, $newState);
-        }
+        if (MlcConfig::hasKey($managedState)) {
+            $newState = MlcConfig::get($managedState);
+        } else throw new \UnexpectedValueException();
 
         if ($order->current_state != $newState) {
             $order->setCurrentState($newState);

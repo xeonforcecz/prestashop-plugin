@@ -4,6 +4,7 @@ namespace MyLoan\HomeCredit;
 
 use Language;
 use MyLoan\HomeCredit\OrderStates\AbstractState;
+use MyLoan\HomeCredit\OrderStates\CancelledState;
 use MyLoan\HomeCredit\OrderStates\ProcessingState;
 use MyLoan\HomeCredit\OrderStates\ReadyPaidState;
 use MyLoan\HomeCredit\OrderStates\ReadyState;
@@ -25,6 +26,7 @@ class OrderStateManager
     {
         $this->generateIsoLangPairs();
 
+        $this->addState(new CancelledState);
         $this->addState(new ProcessingState);
         $this->addState(new ReadyPaidState);
         $this->addState(new ReadyState);

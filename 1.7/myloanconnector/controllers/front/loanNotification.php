@@ -19,11 +19,11 @@ class MyLoanConnectorLoanNotificationModuleFrontController extends ModuleFrontCo
         try {
             \MyLoan\HomeCredit\ResponseAPI::processLoanCreateResponse();
             $this->module->displayConfirmation(
-                $this->module->l('Connection to Home Credit My\Loan API was successful!', __CLASS__)
+                $this->module->l('Connection to Home Credit My\Loan API was successful!')
             );
             $orderCollection = \Order::getByReference(\Tools::getValue("orderNumber"));
             $order_id = $orderCollection->getFirst()->id;
-            //Stav zamÃ­tnuto - nabÃ­dnu uÅ¾ivateli zmÄ›nu platebnÃ­ metody
+            //Stav zamítnuto - nabídnu uživateli zmìnu platební metody
             if (\Tools::getValue("stateReason") == \Loan::REJECTED) {
                 $myLoanConnector = new \MyLoanConnector();
                 $link = $myLoanConnector->getOrderChangePaymentLink($order_id);

@@ -14,7 +14,7 @@ namespace MyLoan;
 class Validate
 {
     /**
-     * Zkontroluje objednÃ¡vku
+     * Zkontroluje objednávku
      * @param \Cart $cart
      * @param \Customer $customer
      * @param \Module $module
@@ -37,7 +37,7 @@ class Validate
           self::checkCurrency($currency, $cart) &&
           $module->validateOrder(
               (int)$cart->id,
-              \MlcConfig::get(\MlcConfig::getIdOfOrderStateMapping(\MyLoan\HomeCredit\OrderStates\ProcessingState::ID)),
+              \MlcConfig::get("HC_PROCESSING"),
               $cart->getOrderTotal(true, \Cart::BOTH),
               $module->displayName,
               null,
@@ -50,7 +50,7 @@ class Validate
     }
 
     /**
-     * Zkontroluje mÄ›nu
+     * Zkontroluje mìnu
      * @param \Currency $currency
      * @param \Cart $cart
      * @return bool
@@ -74,7 +74,7 @@ class Validate
     }
 
     /**
-     * VrÃ¡tÃ­ data a provede validaci
+     * Vrátí data a provede validaci
      * @param $pairs
      * @return array|bool
      */

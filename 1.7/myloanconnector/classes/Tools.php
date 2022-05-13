@@ -7,7 +7,7 @@
 
 namespace MyLoan;
 
-use MyLoan\HomeCredit\EndPointManager;
+use MyLoan\HomeCredit\RequestAPI;
 
 /**
  * Class Tools
@@ -110,7 +110,7 @@ class Tools
      */
     public static function calcVatRate($priceWithVat, $vat)
     {
-        return $priceWithVat != 0 ? round((100 * $vat / $priceWithVat)) : 0.0;
+        return round((100 * $vat / $priceWithVat));
     }
 
     /**
@@ -189,14 +189,13 @@ class Tools
      * @param string $productPrice
      * @return bool
      */
-    public static function shouldHookModule($productPrice = false)
+    public static function shouldHookModule($productPrice = "")
     {
-        $isPriceValid = (!$productPrice) || self::productHasMinimalPrice($productPrice);
         return
           \MlcConfig::isModuleConfigured() &&
-          $isPriceValid &&
+          self::productHasMinimalPrice($productPrice) &&
           self::shopHasAllowedCurrency() &&
-          in_array(\Tools::getValue('controller'), ['product', 'order', 'payment', 'orderopc', 'default']);
+          in_array(\Tools::getValue('controller'), ['product', 'order', 'payment', 'orderopc']);
     }
 
     /**
@@ -212,77 +211,17 @@ class Tools
     }
 
     /**
-     * Získá výchozý kód produktové sady daného produktu
-     * @param $productId
-     * @return string
-     */
-
-    public static function getProductSetCode($productId)
-    {
-        $sql = "SELECT * FROM "._DB_PREFIX_."hc_product WHERE id_product = '$productId'";
-
-        // Výchozí produktový kód
-        $productSetCode = \MlcConfig::get(\MlcConfig::API_PRODUCT_CODE);
-
-        $row = \Db::getInstance()->getRow($sql);
-
-        $productDiscountType = $row["discount"];
-        $productDiscountReferral= $row["referral"];
-        $name = \MlcConfig::REFERRAL_COOKIE_NAME;
-
-        $cookie = new \Cookie(\MlcConfig::REFERRAL_COOKIE_NAME);
-
-        $isDiscounted = (int)$productDiscountType !== (int)\MlcConfig::WITHOUT_DISCOUNT;
-        $isReferral = (int)$productDiscountReferral !== (int)\MlcConfig::WITHOUT_DISCOUNT;
-
-        // check if referral is in cookie data or in GET parameters
-        $isReferralActive =
-            $cookie->$name === \MlcConfig::get(\MlcConfig::DISCOUNT_UTM_STRING) ||
-            \Tools::getValue(\MlcConfig::REFERRAL_COOKIE_NAME) === \MlcConfig::get(\MlcConfig::DISCOUNT_UTM_STRING);
-
-        if($isDiscounted || ($isReferral && $isReferralActive)){
-            $productSetCode = \MlcConfig::get(\MlcConfig::API_DISCOUNT_PRODUCT_CODE);
-        }
-
-        return $productSetCode;
-    }
-
-    /**
-     * Na základě seznamu produktů určí produktovou sadu
-     * @param $products
-     * @return string
-     */
-    public static function getCartProductsSetCode($products)
-    {
-
-        $productSetCode = \MlcConfig::get(\MlcConfig::API_PRODUCT_CODE);
-
-        foreach ($products as $product) {
-
-            $code = self::getProductSetCode($product['id_product']);
-
-            if($code === \MlcConfig::get(\MlcConfig::API_DISCOUNT_PRODUCT_CODE))
-                $productSetCode = $code;
-
-        }
-
-        return $productSetCode;
-    }
-
-    /**
      * Vytvoření url pro kalkulačku
      * @param $productPrice
-     * @param $productSetCode
      * @return string
      */
-    public static function genCalculatorUrl($productPrice, $productSetCode)
+    public static function genCalculatorUrl($productPrice)
     {
-        $manager = EndPointManager::getInstance();
         if (\MlcConfig::get(\MlcConfig::API_CERTIFIED)) {
-            $url = $manager->getApiCalcCertifiedUrl(\MlcConfig::get(\MlcConfig::API_COUNTRY));
+            $url = \MlcConfig::getApiCalcCertifiedUrl(\MlcConfig::get(\MlcConfig::API_COUNTRY));
         } else {
-            $url = $manager->getApiCalcPublicUrl(\MlcConfig::get(\MlcConfig::API_COUNTRY));
-            $url = self::buildPublicHcCalculatorUrl($productPrice, $url, $productSetCode);
+            $url = \MlcConfig::getApiCalcPublicUrl(\MlcConfig::get(\MlcConfig::API_COUNTRY));
+            $url = self::buildPublicHcCalculatorUrl($productPrice, $url);
         }
 
         return $url;
@@ -291,14 +230,12 @@ class Tools
     /**
      * Veřejná url pro kalkulačku
      * @param $productPrice
-     * @param $url
-     * @param $productSetCode
      * @return string
      */
-    public static function buildPublicHcCalculatorUrl($productPrice, $url, $productSetCode)
+    public static function buildPublicHcCalculatorUrl($productPrice, $url)
     {
         $data = [
-          'productSetCode' => $productSetCode,
+          'productSetCode' => \MlcConfig::get(\MlcConfig::API_PRODUCT_CODE),
           'price' => $productPrice,
           'downPayment' => 0,
           'apiKey' => \MlcConfig::get(\MlcConfig::API_CALC_KEY),
@@ -399,9 +336,8 @@ class Tools
         $context = \Context::getContext();
         $module = \Module::getInstanceByName(\MlcConfig::MODULE_NAME);
 
-        $context->controller->errors[] = $module->l($message, __CLASS__);
+        $context->controller->errors[] = $module->l($message);
         $context->controller->redirectWithNotifications("/");
     
 	}
-
 }
