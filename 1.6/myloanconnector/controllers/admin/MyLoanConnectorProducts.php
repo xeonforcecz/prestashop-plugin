@@ -17,7 +17,6 @@ class MyLoanConnectorProductsController extends ModuleAdminController
         $this->bootstrap = true;
         $this->shopLink = false;
         $this->_pagination = array(5, 10, 20, 50, 100);
-        $this->controller_name = "MyLoanConnectorProducts";
 
         $module = Module::getInstanceByName("myloanconnector");
 
@@ -66,8 +65,8 @@ class MyLoanConnectorProductsController extends ModuleAdminController
     }
 
     /**
-     * Callback funkce pro vygenerování checkboxu slevy v tabulce
-     * @param $state int aktuální stav checkboxu
+     * Callback funkce pro vygenerov�n� checkboxu slevy v tabulce
+     * @param $state int aktu�ln� stav checkboxu
      * @param $data array data produktu
      * @return string
      */
@@ -76,8 +75,8 @@ class MyLoanConnectorProductsController extends ModuleAdminController
     }
 
     /**
-     * Callback funkce pro vygenerování checkboxu reference v tabulce
-     * @param $state int aktuální stav checkboxu
+     * Callback funkce pro vygenerov�n� checkboxu reference v tabulce
+     * @param $state int aktu�ln� stav checkboxu
      * @param $data array data produktu
      * @return string
      */
@@ -86,8 +85,8 @@ class MyLoanConnectorProductsController extends ModuleAdminController
     }
 
     /**
-     * Generuje nový stav po kliknutí na checkbox
-     * @param $state int aktuální stav checkboxu
+     * Generuje nov� stav po kliknut� na checkbox
+     * @param $state int aktu�ln� stav checkboxu
      * @return string
      */
     private static function getNewState($state){
@@ -101,7 +100,7 @@ class MyLoanConnectorProductsController extends ModuleAdminController
     }
 
     /**
-     * Generuje nový chekbox
+     * Generuje nov� chekbox
      * @param $id_product int
      * @param $state int
      * @param $discount int
@@ -117,7 +116,7 @@ class MyLoanConnectorProductsController extends ModuleAdminController
     }
 
     /**
-     * Zpracování zachycených zmìn v tabulce (GET / POST)
+     * Zpracov�n� zachycen�ch zm�n v tabulce (GET / POST)
      * @return void
      */
     public function postProcess()
@@ -135,26 +134,22 @@ class MyLoanConnectorProductsController extends ModuleAdminController
     }
 
     /**
-     * Callback funkce pro vygenerování checkboxu slevy v tabulce
+     * Callback funkce pro vygenerov�n� checkboxu slevy v tabulce
      * @param $id_product
      * @param $discount
      * @param $referral
      */
     private function updateProductData($id_product, $discount, $referral){
 
-        // Vložit nový produkt
+        // Vlo�it nov� produkt
         try {
-            $r = Db::getInstance()->insert('hc_product', array(
+            Db::getInstance()->insert('hc_product', array(
               'id_product' => (int)$id_product,
               'discount' => $discount,
               'referral' => $referral,
             ));
-            
-            if(!$r)
-                throw new Exception('Insert failed.');
-                
         } catch (Exception $e) {
-            // Pokud již existuje, nejde vložit, updatuju
+            // Pokud ji� existuje, nejde vlo�it, updatuju
             Db::getInstance()->update('hc_product', array(
               'discount' => $discount,
               'referral' => $referral,

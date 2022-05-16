@@ -108,7 +108,7 @@ class Loan extends ObjectModel
     ];
 
     /**
-     * Aktualizace objednávky v Myloan
+     * Aktualizace objedn�vky v Myloan
      * @param $id
      * @throws PrestaShopModuleException
      */
@@ -124,7 +124,7 @@ class Loan extends ObjectModel
 
 
     /**
-     * Vrátí akontaci
+     * Vr�t� akontaci
      * @return mixed
      */
     public function getIdOrder()
@@ -157,7 +157,7 @@ class Loan extends ObjectModel
     }
 
     /**
-     * Naství u objednávky akontaci
+     * Nastv� u objedn�vky akontaci
      * @return mixed
      */
     public function getDownPayment()
@@ -178,7 +178,7 @@ class Loan extends ObjectModel
     }
 
     /**
-     * Vratí měnu
+     * Vrat� m�nu
      * @return mixed
      */
     public function getCurrency()
@@ -187,7 +187,7 @@ class Loan extends ObjectModel
     }
 
     /**
-     * Nastaví měnu
+     * Nastav� m�nu
      * @param string $currency
      */
     public function setCurrency($currency)
@@ -196,7 +196,7 @@ class Loan extends ObjectModel
     }
 
     /**
-     * Vratí stav z Myloan
+     * Vrat� stav z Myloan
      * @return mixed
      */
     public function getStateReason()
@@ -205,7 +205,7 @@ class Loan extends ObjectModel
     }
 
     /**
-     * Nastaví stav
+     * Nastav� stav
      * @param mixed $state_reason
      */
     public function setStateReason($state_reason)
@@ -214,7 +214,7 @@ class Loan extends ObjectModel
     }
 
     /**
-     * Vrátí id předělené v Myloan
+     * Vr�t� id p�ed�len� v Myloan
      * @return mixed
      */
     public function getApplicationId()
@@ -223,7 +223,7 @@ class Loan extends ObjectModel
     }
 
     /**
-     * Nastaví id přidělené v Myloan
+     * Nastav� id p�id�len� v Myloan
      * @param mixed $application_id
      */
     public function setApplicationId($application_id)
@@ -232,7 +232,7 @@ class Loan extends ObjectModel
     }
 
     /**
-     * Vrátí url do eshopu
+     * Vr�t� url do eshopu
      * @return mixed
      */
     public function getApplicationUrl()
@@ -241,7 +241,7 @@ class Loan extends ObjectModel
     }
 
     /**
-     * Nastaví url pro redirect do eshopu
+     * Nastav� url pro redirect do eshopu
      * @param mixed $application_url
      */
     public function setApplicationUrl($application_url)

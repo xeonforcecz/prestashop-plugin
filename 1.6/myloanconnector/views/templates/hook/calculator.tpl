@@ -60,8 +60,8 @@
 
             } else {
 
-                return currency.iso_code;
-                
+                return "{$currency.iso_code}";
+
             }
         }
 
@@ -98,39 +98,37 @@
 
         }
     
-
-        function showCalc() {
-            let calcUrl = htmlDecode('{urldecode($calcUrl)}');
-            calcUrl = calcUrl.replace(/%price_placeholder%/g, productPriceVariant);
-
-            {if $isCertified == true}
-                let apiKey = '{$apiKey|escape:'quotes'}';
-                showHcCalc('{$productSetCode|escape:'htmlall':'UTF-8'}', productPriceVariant, 0, false, calcUrl, apiKey, processCalcResult);
-            {else}
-                let dualScreenLeft = window.screenLeft != undefined ? window.screenLeft : window.screenX;
-                let dualScreenTop = window.screenTop != undefined ? window.screenTop : window.screenY;
-                let width = window.innerWidth ? window.innerWidth : document.documentElement.clientWidth ? document.documentElement.clientWidth : screen.width;
-                let height = window.innerHeight ? window.innerHeight : document.documentElement.clientHeight ? document.documentElement.clientHeight : screen.height;
-                let w = 800;
-                let h = 550;
-                let systemZoom = width / window.screen.availWidth;
-                let left = (width - w) / 2 / systemZoom + dualScreenLeft;
-                let top = (height - h) / 2 / systemZoom + dualScreenTop;
-
-                window.open(calcUrl, '_blank', 'toolbar=no, location=no, directories=no, status=no, menubar=no, copyhistory=no, width='+w+', height='+h+', top='+top+', left='+left);
-            {/if}
-        }
+    function showCalc() {
+        let calcUrl = htmlDecode(decodeURI(decodeURIComponent('{$calcUrl|escape:'url'}')));
+        calcUrl = calcUrl.replace(/%price_placeholder%/g, productPriceVariant);
 
         {if $isCertified == true}
+            let apiKey = '{$apiKey|escape:'quotes'}';
+            showHcCalc('{$productSetCode|escape:'htmlall':'UTF-8'}', productPriceVariant, 0, false, calcUrl, apiKey, processCalcResult);
+        {else}
+            let dualScreenLeft = window.screenLeft != undefined ? window.screenLeft : window.screenX;
+            let dualScreenTop = window.screenTop != undefined ? window.screenTop : window.screenY;
+            let width = window.innerWidth ? window.innerWidth : document.documentElement.clientWidth ? document.documentElement.clientWidth : screen.width;
+            let height = window.innerHeight ? window.innerHeight : document.documentElement.clientHeight ? document.documentElement.clientHeight : screen.height;
+            let w = 800;
+            let h = 550;
+            let systemZoom = width / window.screen.availWidth;
+            let left = (width - w) / 2 / systemZoom + dualScreenLeft;
+            let top = (height - h) / 2 / systemZoom + dualScreenTop;
+            window.open(calcUrl, '_blank', 'toolbar=no, location=no, directories=no, status=no, menubar=no, copyhistory=no, width='+w+', height='+h+', top='+top+', left='+left);
+    {/if}
+    }
 
-            function processCalcResult(calcResult) {
-                //ajaxCart.add({$productId|escape:'htmlall':'UTF-8'}, null, false, this);
-                calcResult.productPrice = productPriceVariant;
-                $.post( "{$calcPostUrl|escape:'quotes'}", {literal}{hc_calculator: JSON.stringify(calcResult)});{/literal}
-                $.cookie("hc_calculator", JSON.stringify(calcResult));
-            }
+    {if $isCertified == true}
 
-        {/if}
+        function processCalcResult(calcResult) {
+            //ajaxCart.add({$productId|escape:'htmlall':'UTF-8'}, null, false, this);
+            calcResult.productPrice = {$productPrice|escape:'htmlall':'UTF-8'};
+            $.post(  decodeURI(decodeURIComponent("{$calcPostUrl|escape:'url'}")), {literal}{hc_calculator: JSON.stringify(calcResult)});{/literal}
+            $.cookie("hc_calculator", JSON.stringify(calcResult));
+        }
+
+    {/if}
 
         
     }

@@ -69,16 +69,25 @@ class PaymentMethods extends ModuleFrontController
      * @param $text
      * @param $type
      */
-    protected function showMessage($text, $type)
+    protected function showMessage($text, $type = "danger")
     {
-        $this->context->smarty->assign(
-            array(
-            "show_message" => $this->module->l($text, __CLASS__),
-            "type" => $type
-            )
-        );
 
-        $this->setTemplate('message.tpl');
-        //$this->setTemplate('module:myloanconnector/views/templates/front/message.tpl'); verze => 1.7
+        switch ($type) {
+
+            case "info":
+                $this->info[] = $this->l($text);
+                break;
+            case "success":
+                $this->success[] = $this->l($text);
+                break;
+            case "danger":
+            default:
+                $this->errors[] = $this->l($text);
+                break;
+
+        }
+
+        $this->redirectWithNotifications($this->getCurrentURL());
     }
+
 }

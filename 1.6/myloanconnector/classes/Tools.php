@@ -36,7 +36,11 @@ class Tools
             $link = new \Link;
             $image = new \Image($id_image['id_image']);
             $imageName = "$image->id_product-$imageType.$image->image_format";
-            $productImage['url'] = $link->getImageLink($product->link_rewrite, $image->id_image, $imageType);
+            if(array_key_exists("link_rewrite", $product))
+                $productImage['url'] = $link->getImageLink($product["link_rewrite"], $image->id_image, $imageType);
+            else
+                $productImage['url'] = $link->getImageLink($product->link, $image->id_image, $imageType);
+
             $productImage['filename'] = $imageName;
         }
 
@@ -62,7 +66,7 @@ class Tools
      */
     public static function convertNumberFromMinorUnits($amount, $currency)
     {
-        return round($amount / (10 ** self::getCurrencyMinorUnit($currency)));
+        return $amount / (10 ** self::getCurrencyMinorUnit($currency));
     }
 
     /**
@@ -192,7 +196,7 @@ class Tools
           \MlcConfig::isModuleConfigured() &&
           $isPriceValid &&
           self::shopHasAllowedCurrency() &&
-          in_array(\Tools::getValue('controller'), ['product', 'order', 'payment', 'orderopc']);
+          in_array(\Tools::getValue('controller'), ['product', 'order', 'payment', 'orderopc', 'default']);
     }
 
     /**
@@ -204,12 +208,11 @@ class Tools
     {
         $context = \Context::getContext();
         $product = new \Product($productId);
-        //var_dump($product->getAttributesResume($context->language->id));
         return \MyLoan\Tools::convertNumberToMinorUnits($product->getPrice(), $context->currency->iso_code);
     }
 
     /**
-     * Získá výchozý kód produktové sady daného produkt
+     * Získá výchozý kód produktové sady daného produktu
      * @param $productId
      * @return string
      */
@@ -396,11 +399,9 @@ class Tools
         $context = \Context::getContext();
         $module = \Module::getInstanceByName(\MlcConfig::MODULE_NAME);
 
-        $context->smarty->assign(
-            [
-            "show_message" => $module->l($message, __CLASS__),
-            "type" => 'danger'
-            ]
-        );
-    }
+        $context->controller->errors[] = $module->l($message, __CLASS__);
+        $context->controller->redirectWithNotifications("/");
+    
+	}
+
 }

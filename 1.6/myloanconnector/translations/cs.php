@@ -42,12 +42,13 @@ $_MODULE['<{myloanconnector}prestashop>loannotification_ba663e2d29f32dba14ee372c
 $_MODULE['<{myloanconnector}prestashop>payment_655af3dc9e26faf08175800582d38e94'] = 'Došlo k chybě během potvrzení objednávky.';
 $_MODULE['<{myloanconnector}prestashop>payment_a474447b8238666efd055c59d5861cf5'] = 'Prosím zkuste to znovu.';
 $_MODULE['<{myloanconnector}prestashop>payment_b7e8f20fae5845759293c4a26e1e36bb'] = 'Neplatná objednávka';
+$_MODULE['<{myloanconnector}prestashop>payment_9af86970767dfbabb64464795294a34c'] = 'Problém s připojením do Home Creditu!';
 $_MODULE['<{myloanconnector}prestashop>rejected_565d3d20d321a8a151f40ebcb5c6ad64'] = 'Došlo k problému s připojením k Home Creditu, změňte prosím způsob platby a pokračujte';
 $_MODULE['<{myloanconnector}prestashop>rejected_cf55808ee9097d7fb235c8b29951a678'] = 'Vaše žádost o půjčku byla zamítnuta, pokud si přejte změnit platební metodu';
 $_MODULE['<{myloanconnector}prestashop>rejected_6c92285fa6d3e827b198d120ea3ac674'] = 'klikněte zde';
 $_MODULE['<{myloanconnector}prestashop>waitfornextstep_35d66691ced966d2284fa888c2e48ee0'] = 'Vaše žádost o půjčku byla přijata, o dalším postupu Vás bude informovat Home Credit.';
+$_MODULE['<{myloanconnector}prestashop>adminorder_32bf66a5659bf30c9a777ed4372d2c27'] = 'Home Credit';
 $_MODULE['<{myloanconnector}prestashop>adminorder_ec53a8c4f07baed5d8825072c89799be'] = 'Stav';
-$_MODULE['<{myloanconnector}prestashop>adminorder_ea4788705e6873b424c65e91c2846b19'] = 'Zrušit';
 $_MODULE['<{myloanconnector}prestashop>adminorder_1398d37e1f018db6a18fb08db82d42d2'] = 'Změněna doprava objednávky';
 $_MODULE['<{myloanconnector}prestashop>adminorder_b7305b2fbdb58b4fa7eb95d545875851'] = 'Obsah košíku se změnil nebo se zákazník z košíku vrátil';
 $_MODULE['<{myloanconnector}prestashop>adminorder_45e048ce4d8cf24f9204da7df3a3b2fa'] = 'Zákazník zrušil objednávku(V profilu nebo prostřednictvím zákaznického centra)';
@@ -57,6 +58,7 @@ $_MODULE['<{myloanconnector}prestashop>adminorder_84d02700b04470084fab7d4a289822
 $_MODULE['<{myloanconnector}prestashop>adminorder_bb924dc2e95f110b61f1a988175f40ee'] = 'Byla porušena interní pravidla eshopu (např. Problém s dodatečnými údaji zákazníka)';
 $_MODULE['<{myloanconnector}prestashop>adminorder_86c2166114735ec9ea4f267c32b53de1'] = 'Jiný důvod - specifikován v poznámce';
 $_MODULE['<{myloanconnector}prestashop>adminorder_d3acdfe789d632ead3bef8b2831e6ae7'] = 'Důvod zrušení';
+$_MODULE['<{myloanconnector}prestashop>adminorder_ea4788705e6873b424c65e91c2846b19'] = 'Zrušit';
 $_MODULE['<{myloanconnector}prestashop>calculator_43850f524b996f6d8a843d492b0d6097'] = 'Kalkulačka splátek';
 $_MODULE['<{myloanconnector}prestashop>payment_1bb46d70631e3d76bf170f2dc044fd69'] = '(Koupit na splátky)';
 $_MODULE['<{myloanconnector}prestashop>payment_c453a4b8e8d98e82f35b67f433e3b4da'] = 'Platba';

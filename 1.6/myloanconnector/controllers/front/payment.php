@@ -53,14 +53,11 @@ class MyLoanConnectorPaymentModuleFrontController extends ModuleFrontController
                 \MyLoan\HomeCredit\ResponseAPI::changeOrderState(\Loan::REJECTED, $order_id);
             }
 
-            $this->context->smarty->assign(
-              [
-                "error" => true,
-                "linkChangePayment" => $this->module->getOrderChangePaymentLink($order_id)
-              ]
+            $this->showMessage(
+              $module->l('Connection with Home Credit error!') . " " .
+              $module->l('Please try again later.') . " " .
+              $e->getMessage()
             );
-
-            $this->setTemplate('rejected.tpl');
         }
     }
 
@@ -71,6 +68,30 @@ class MyLoanConnectorPaymentModuleFrontController extends ModuleFrontController
         if (Tools::getIsset($cookie_name)) {
             $this->context->cookie->$cookie_name = Tools::getValue($cookie_name);
             $this->context->cookie->write();
+            exit;
         }
     }
+
+    protected function showMessage($text, $type = "danger")
+    {
+
+        switch ($type) {
+
+            case "info":
+                $this->info[] = $this->l($text);
+                break;
+            case "success":
+                $this->success[] = $this->l($text);
+                break;
+            case "danger":
+            default:
+                $this->errors[] = $this->l($text);
+                break;
+
+        }
+
+        $this->redirectWithNotifications("/");
+    }
+
+
 }

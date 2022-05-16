@@ -158,7 +158,7 @@ class MlcConfig extends Configuration
     }
 
     /**
-     * Metoda která naisntaluje vše potřebné
+     * Metoda která naisntaluje vše potøebné
      * @return bool
      */
     public static function install()
@@ -219,7 +219,7 @@ class MlcConfig extends Configuration
           $module->registerHook('leftColumn') &&
           $module->registerHook('header') &&
           $module->registerHook('displayProductButtons') &&
-          $module->registerHook('payment') &&
+          $module->registerHook('paymentOptions') &&
           $module->registerHook('actionPaymentConfirmation') &&
           $module->registerHook('actionOrderStatusPostUpdate') &&
           $module->registerHook('actionOrderStatusUpdate') &&
@@ -231,7 +231,7 @@ class MlcConfig extends Configuration
 
 
     /**
-     * Vytvoří databázi
+     * Vytvoøí databázi
      * @return bool
      */
     public static function createDatabaseTables()
@@ -267,7 +267,7 @@ class MlcConfig extends Configuration
     }
 
 
-    /** Nastaví povolené typy stavů objednávek podle volby v administraci modulu.
+    /** Nastaví povolené typy stavù objednávek podle volby v administraci modulu.
      * @param int $type
      */
     public static function setExpeditionType($type = 1){
@@ -302,7 +302,7 @@ class MlcConfig extends Configuration
     }
 
     /**
-     * Přidání sloupce do tabulky objednávek
+     * Pøidání sloupce do tabulky objednávek
      * @return bool
      */
     public static function alterDatabaseTables()
@@ -514,7 +514,7 @@ class MlcConfig extends Configuration
     }
 
     /**
-     * Vyzkouší připojení k Myloan
+     * Vyzkouší pøipojení k Myloan
      * @return bool|string
      */
     public static function testHCApiConnection()
@@ -554,7 +554,7 @@ class MlcConfig extends Configuration
     }
 
     /**
-     * Zjistí jestli je modul správně nastaven
+     * Zjistí jestli je modul správnì nastaven
      * @return bool
      */
     public static function isModuleConfigured()
@@ -654,6 +654,7 @@ class MlcConfig extends Configuration
      */
     private static function generateInputs(OrderStateManager $manager, Module $module, Language $language)
     {
+
 
         $inputsToPrepend = [
           [
@@ -801,7 +802,7 @@ ORDER BY `name` ASC')
 
 
     /**
-     * Aktivuje položky menu při povolení pluginu
+     * Aktivuje položky menu pøi povolení pluginu
      * @param bool $force_all
      * @return bool
      */
@@ -814,7 +815,7 @@ ORDER BY `name` ASC')
     }
 
     /**
-     * Deaktivuje položky menu při zakázání pluginu
+     * Deaktivuje položky menu pøi zakázání pluginu
      * @param bool $force_all
      * @return bool
      */
@@ -844,7 +845,7 @@ ORDER BY `name` ASC')
         $module = Module::getInstanceByName(self::MODULE_NAME);
 
         foreach (Language::getIsoIds(true) as $lang) {
-            $tab->name[$lang['id_lang']] = $name[$lang['iso_code']];
+            $tab->name[$lang['id_lang']] = (string)$module->l($name["en"], __CLASS__);
         }
 
         $tab->id_parent = $id_parent;

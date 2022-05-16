@@ -41,7 +41,7 @@ class RequestAPI extends AuthAPI
     }
 
     /**
-     * aktualizace objednávky v Myloan
+     * aktualizace objedn�vky v Myloan
      * @param string $orderNumberPS
      * @return array
      * @throws PrestaShopModuleException
@@ -51,7 +51,9 @@ class RequestAPI extends AuthAPI
         $loan = new Loan($orderNumberPS);
         $response = $this->getLoanDetail($loan->getApplicationId());
 
-        $loan->setStateReason($response["stateReason"]);
+        if(array_key_exists("stateReason", $response)) {
+            $loan->setStateReason($response["stateReason"]);
+        }
 
         if(array_key_exists("gatewayRedirectUrl", $response)) {
             $loan->setApplicationUrl($response["gatewayRedirectUrl"]);
@@ -71,7 +73,7 @@ class RequestAPI extends AuthAPI
     }
 
     /**
-     * Vytvoření objednávky v Myloan
+     * Vytvo�en� objedn�vky v Myloan
      * @param string $orderNumberPS
      * @return array|null
      * @throws PrestaShopException
@@ -92,7 +94,7 @@ class RequestAPI extends AuthAPI
           "order" => $this->createOrder($order, $currency, $deliveryAddress, $invoiceAddress),
           "type" => "INSTALLMENT",
           "merchantUrls" => $this->createMerchantUrl($link),
-            "settingsInstallment" => $this->createSettingsInstallment($currency, $order),
+          "settingsInstallment" => $this->createSettingsInstallment($currency, $order),
           "agreementPersonalDataProcessing" => true,
         );
 
@@ -111,14 +113,13 @@ class RequestAPI extends AuthAPI
         $loan->setStateReason($response['stateReason']);
         $loan->setApplicationId($response['id']);
         $loan->setApplicationUrl($response['gatewayRedirectUrl']);
-        $loan->setCurrency($currency->suffix);
+        $loan->setCurrency($currency->sign);
         $loan->add();
-
         return $response;
     }
 
     /**
-     * Vezme nastavení z již nastavených session a nastaví to do Myloan systému
+     * Vezme nastaven� z ji� nastaven�ch session a nastav� to do Myloan syst�mu
      * @return array|false
      */
     private function createFingerprintComponents()
@@ -146,7 +147,7 @@ class RequestAPI extends AuthAPI
     }
 
     /**
-     * Vytvoří třídu customer pro další práci z OneClickApi
+     * Vytvo�� t��du customer pro dal�� pr�ci z OneClickApi
      * @param Customer $customer
      * @param Address $invoiceAddress
      * @return array Customer
@@ -172,17 +173,17 @@ class RequestAPI extends AuthAPI
         }
 
         return array (
-            'firstName' => $customer->firstname,
-            'lastName' =>  $customer->lastname,
-            'email' => $customer->email,
-            'phone' => trim($phone),
-            'addresses' => [$address],
-            'tin' => $invoiceAddress->vat_number,
-            'ipAddress' => \Tools::getRemoteAddr()
+          'firstName' => $customer->firstname,
+          'lastName' =>  $customer->lastname,
+          'email' => $customer->email,
+          'phone' => trim($phone),
+          'addresses' => [$address],
+          'tin' => $invoiceAddress->vat_number,
+          'ipAddress' => \Tools::getRemoteAddr()
         );
     }
 
-    /** Vytvoří pole adresy
+    /** Vytvo�� pole adresy
      * @param string $firstname
      * @param string $lastname
      * @param string $city
@@ -204,7 +205,7 @@ class RequestAPI extends AuthAPI
     }
 
     /**
-     * Vytvoří jednotlivé položky pro další práci z OneClickApi
+     * Vytvo�� jednotliv� polo�ky pro dal�� pr�ci z OneClickApi
      * @param Order $order
      * @param Currency $currency
      * @return array
@@ -224,13 +225,14 @@ class RequestAPI extends AuthAPI
 
             $link = new Link();
 
-            if(array_key_exists("link_rewrite", $orderItem)) {
-                $imageLink = "http://" . $link->getImageLink($orderItem["link_rewrite"], (int)$orderItem['id_product']);
-            } else {
-                $imageLink = false;
-            }
+            // Get cover image for your product
+            $image = \Image::getCover($orderItem['id_product']);
 
-            if(!$imageLink || strpos($imageLink, "localhost") || strpos($imageLink, "127.0.0.1")){
+            // Load Product Object
+            $product = new \Product($orderItem['id_product'], false, Context::getContext()->language->id);
+
+            $imageLink = "http://".$link->getImageLink(isset($product->link_rewrite) ? $product->link_rewrite : $product->name, $image['id_image'], 'home_default');
+            if(strpos($imageLink, "localhost") || strpos($imageLink, "127.0.0.1")){
                 $imageLink = "https://via.placeholder.com/150";
             }
 
@@ -285,10 +287,6 @@ class RequestAPI extends AuthAPI
             $itemTotalVat = $itemTotalPriceWithVat - $itemTotalPriceWithoutVat;
             $itemVatRate = Tools::calcVatRate($itemTotalPriceWithoutVat, $itemTotalVat);
 
-            if($itemTotalPriceWithVat == 0){
-                continue;
-            }
-
             $manufacturer = new Manufacturer($orderItem['id_manufacturer']);
 
             $items[] = [
@@ -323,7 +321,7 @@ class RequestAPI extends AuthAPI
     }
 
     /**
-     * Vytvoří objednávku pro další práci z OneClickApi
+     * Vytvo�� objedn�vku pro dal�� pr�ci z OneClickApi
      * @param Order $order
      * @param Currency $currency
      * @param Address $addressDelivery
@@ -396,7 +394,7 @@ class RequestAPI extends AuthAPI
     }
 
     /**
-     * Notifikační url
+     * Notifika�n� url
      * @param Link $link
      * @return array
      */
@@ -413,7 +411,7 @@ class RequestAPI extends AuthAPI
     }
 
     /**
-     * Vytvoří defaultní nastavení pro uživatele, pokud je možné vezme z cookies pokud není je toto zvoleno až v Myloan
+     * Vytvo�� defaultn� nastaven� pro u�ivatele, pokud je mo�n� vezme z cookies pokud nen� je toto zvoleno a� v Myloan
      * @param Currency $currency
      * @param Order $order
      * @return array
@@ -451,7 +449,7 @@ class RequestAPI extends AuthAPI
     }
 
     /**
-     * Označí objednávku jako doručenou v Myloan
+     * Ozna�� objedn�vku jako doru�enou v Myloan
      * @param string $applicationId
      * @return array|null
      * @throws PrestaShopModuleException
@@ -466,7 +464,7 @@ class RequestAPI extends AuthAPI
     }
 
     /**
-     * Označí objednávku jako odeslanou v Myloan
+     * Ozna�� objedn�vku jako odeslanou v Myloan
      * @param string $applicationId
      * @return array|null
      * @throws PrestaShopModuleException

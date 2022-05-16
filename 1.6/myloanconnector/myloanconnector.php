@@ -9,6 +9,8 @@ if (!defined('_PS_VERSION_')) {
     exit;
 }
 
+use PrestaShop\PrestaShop\Core\Payment\PaymentOption;
+
 include(dirname(__FILE__) . DIRECTORY_SEPARATOR . 'vendor/autoload.php');
 
 class MyLoanConnector extends PaymentModule
@@ -31,7 +33,7 @@ class MyLoanConnector extends PaymentModule
 
         if (isset($this->context->employee) && $this->context->employee->isLoggedBack()) {
             if (!MlcConfig::isModuleConfigured()) {
-                $this->warning = $this->l('Module must be configured first!', __CLASS__);
+                $this->warning = $this->l('Module must be configured first!');
             }
         }
 
@@ -161,11 +163,14 @@ class MyLoanConnector extends PaymentModule
      */
     public function hookDisplayProductButtons($hookParams)
     {
+        $context = \Context::getContext();
+        $productPrice = \MyLoan\Tools::getProductPriceInMinorUnits($hookParams["product"]["id"]);
+
         if (!\MyLoan\Tools::shouldHookModule(false)) {
             return false;
         }
 
-        $productId = $hookParams["product"]->id;
+        $productId = $hookParams["product"]["id"];
         $productPrice = \MyLoan\Tools::getProductPriceInMinorUnits($productId);
         $productSetCode = \MyLoan\Tools::getProductSetCode($productId);
 
@@ -191,7 +196,7 @@ class MyLoanConnector extends PaymentModule
     /**
      * @return bool|void
      */
-    public function hookPayment()
+    public function hookPaymentOptions()
     {
         $cartOrderTotal = $this->context->cart->getOrderTotal();
 
@@ -220,17 +225,37 @@ class MyLoanConnector extends PaymentModule
             "productSetCode" => $productSetCode,
             "apiKey" => \MlcConfig::get(\MlcConfig::API_CALC_KEY),
             'hcLogo' => \MyLoan\Tools::getImagePath("hc-logo.svg"),
-            'actionUrl' => $this->context->link->getModuleLink(
-                MlcConfig::MODULE_NAME,
-                'payment',
-                ['cartID' => $this->context->cart->id],
-                true
-            ),
             'cartOrderTotal' => $cartOrderTotal
             ]
         );
 
-        return $this->display(__FILE__, 'payment.tpl');
+        $newOption = new PaymentOption();
+
+        try {
+
+            $newOption->setModuleName($this->name)
+                ->setCallToActionText('HomeCredit')
+                //->setLogo(\MyLoan\Tools::getImagePath("hc-logo.svg"))
+                ->setAction($this->context->link->getModuleLink(
+                    MlcConfig::MODULE_NAME,
+                    'payment',
+                    ['cartID' => $this->context->cart->id],
+                    true
+                ))
+                ->setAdditionalInformation($this->context->smarty->fetch('module:myloanconnector/views/templates/hook/payment.tpl'));
+
+        } catch(Exception $e){
+
+            $this->_errors[] = "Payment option error: $e->getMessage()";
+            die($e);
+
+        }
+
+        $payment_options = [
+          $newOption,
+        ];
+
+        return $payment_options;
     }
 
     /**
@@ -284,7 +309,7 @@ class MyLoanConnector extends PaymentModule
                 }
             }
 
-            if (array_key_exists("errors", $response)) {
+            if (is_null($response) || array_key_exists("errors", $response)) {
                 \MyLoan\Tools::addMyError(
                   $this->l("HomeCredit change order stare error", __CLASS__) . ":" .
                   $response["errors"][0]["message"]
@@ -368,7 +393,7 @@ class MyLoanConnector extends PaymentModule
     {
         $params['fields'] += [
           'downpayment' => [
-            'title' => $this->l('Downpayment', __CLASS__),
+            'title' => $this->l('Downpayment'),
             'search' => false,
           ],
         ];

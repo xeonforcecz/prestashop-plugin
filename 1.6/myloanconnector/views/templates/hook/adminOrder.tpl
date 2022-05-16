@@ -7,7 +7,7 @@
 <div class="panel">
     <div class="panel-heading">
         <i class="icon-edit"></i>
-        HomeCredit
+        {l s='HomeCredit' mod='myloanconnector' }
     </div>
 
     <div class="row">
@@ -24,10 +24,10 @@
         </div>
         <div class="col-md-6">
             <form action="{$cancelLink|escape:'htmlall':'UTF-8'}" method="post" id="cancelform">
-                <h4>{l s='Cancel' mod='myloanconnector' }</h4>
+                <h4>{l s='Cancel' }</h4>
                 <select name="reason" type="text" class="form-control" >
                     <option value="APPLICATION_CANCELLED_CARRIER_CHANGED">
-                        {l s='Order carrier changed'  mod='myloanconnector' }
+                        {l s='Order carrier changed' mod='myloanconnector' }
                     </option>
                     <option value="APPLICATION_CANCELLED_CART_CONTENT_CHANGED">
                         {l s='Cart content changed or customer returned from the cart' mod='myloanconnector' }
