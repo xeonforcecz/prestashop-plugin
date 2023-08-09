@@ -69,6 +69,7 @@ class ResponseAPI
         Loan::updateLoan($order_id);
         $loan = new Loan($order_id);
 
+        //var_dump($loan);
         if (!self::authLoanCreateResponse($loan)) {
             throw new PrestaShopModuleException("HomeCredit API - unauthorized request");
         }
@@ -83,7 +84,7 @@ class ResponseAPI
      */
     public static function authLoanCreateResponse(Loan $loan)
     {
-        return $loan->getApplicationId() === (string)\Tools::getValue("id");
+        return $loan->getApplicationId() === (string)\Tools::getValue("applicationId");
     }
 
     /**

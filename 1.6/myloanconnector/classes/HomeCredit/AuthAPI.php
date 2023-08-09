@@ -45,7 +45,6 @@ class AuthAPI
         $this->setApiAddress($credentials[MlcConfig::API_URL]);
         $this->setApiUser($credentials[MlcConfig::API_USER]);
         $this->setApiPassword($credentials[MlcConfig::API_PASSWORD]);
-
         $this->authorize();
 
     }
@@ -60,6 +59,7 @@ class AuthAPI
         try {
             $this->client = new HcApi(array($this->getApiUser(), $this->getApiPassword()), $this->getApiAddress());
         } catch (Exception $e){
+
             throw new PrestaShopModuleException("HomeCredit API - Cannot construct HcApi.", $e->getCode());
         }
 
