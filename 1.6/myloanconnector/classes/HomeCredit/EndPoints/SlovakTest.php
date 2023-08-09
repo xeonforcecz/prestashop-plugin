@@ -12,8 +12,8 @@ namespace MyLoan\HomeCredit\EndPoints;
 class SlovakTest implements IEndPoint
 {
     private $id = "SK_TEST";
-    private $apiUrl = "https://apisk-test.homecredit.net/verdun-train/";
-    private $apiCalcUrl = "https://apisk-test.homecredit.net/verdun-train/public/v1/calculator/";
+    private $apiUrl = "https://apisk-test.homecredit.sk/verdun-train/";
+    private $apiCalcUrl = "https://apisk-test.homecredit.sk/verdun-train/public/v1/calculator/";
     private $apiPublicCalcUrl = "https://kalkulacka-sk.train.hccs.net/";
 
     public function getId()
