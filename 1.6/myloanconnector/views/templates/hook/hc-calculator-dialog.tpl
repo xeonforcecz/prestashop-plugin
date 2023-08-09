@@ -4,7 +4,7 @@
 *  @license    http://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
 *}
 
-<div id="hc-calc-container">
+<div id="hc-calc-container" class="row">
     <div id="hc-calc-modal" class="hc-modal" role="dialog" style="display: none; z-index: 999999;">
         <div class="hc-modal__dialog">
             <div class="hc-modal__content">
@@ -20,5 +20,5 @@
                 <div id="hc-calculator-wrapper" class="hc-modal__body"></div>
             </div>
         </div>
-    </div>
+</div>
 </div>

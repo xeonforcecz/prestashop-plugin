@@ -4,36 +4,43 @@
 *  @license    http://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
 *}
 
-<section>
-    <div id="myloanconnector-logo" style="text-align: center;">
-        <img src="{$hcLogo|escape:'quotes'}" height="30"/>
-    </div>
-<br>
-    <div style="text-align: center;">
-        <div>
-        {if !empty($loanOverview)}
-            {l s='(Buy in installments)' mod='myloanconnector' }
-            {if !empty($loanOverview)}
-                <div>({l s='Payment'  mod='myloanconnector'} <span id="loan-overview">{$loanOverview|escape:'htmlall':'UTF-8'}</span>)</div>
-            {/if}
-            {if $isCertified == true}
-                <div id="hc-change-payment" onclick="showCalc()" style="text-decoration: underline; cursor: pointer;">
-                    {l s='Change calculaton' mod='myloanconnector' }
-                </div>
-            {/if}
-        {else}
-            <div onclick="showCalc()" style="text-decoration: underline; cursor: pointer;">
-                {l s='Buy in installments redirect' mod='myloanconnector' }
-            </div>
-        {/if}
-    </div>
-            <br>
-            <div id="hc-info" style="font-size: 14px; text-decoration: underline;" role="button" data-toggle="modal" data-target="#infoModal">
-                {l s='Information on the transmission of data to Home Credit a.s.' mod='myloanconnector' }
-            </div>
-    </div>
+<div class="row" id="hc-confirm-payment-method">
+    <div class="col-xs-12">
+        <p class="payment_module" id="hc-select-payment">
+            <a class="cheque"> <!-- href="{$actionUrl}"-->
+                <img src="{$hcLogo|escape:'quotes'}" height="30"/>
+                <span>
+                {if !empty($loanOverview)}
+                    {l s='(Buy in installments)' mod='myloanconnector' }
+                    {if !empty($loanOverview)}
+                        <span>({l s='Payment'  mod='myloanconnector'} {$loanOverview|escape:'htmlall':'UTF-8'})</span>
+                    {/if}
 
-</section>
+                        {if $isCertified == true}
+                            <span id="hc-change-payment" onclick="showCalc()" style="padding: 8px;">{l s='Change calculaton' mod='myloanconnector' }</span>
+                        {else}
+                            <span id="hc-change-payment" style="padding: 8px;">{l s='Change calculaton' mod='myloanconnector' }</span>
+                        {/if}
+
+                    {else}
+                    <span onclick="showCalc()">
+                        {l s='Buy in installments redirect' mod='myloanconnector' }
+                    </span>
+                {/if}
+                    <br>
+                    <br>
+                    <span id="hc-info" style="font-size: 14px; text-decoration: underline;" role="button" data-toggle="modal" data-target="#infoModal">
+                        {l s='Information on the transmission of data to Home Credit a.s.' mod='myloanconnector' }
+                    </span>
+                </span>
+
+                {if $isCertified == true}
+                    {include "./hc-calculator-dialog.tpl"}
+                {/if}
+            </a>
+        </p>
+    </div>
+</div>
 
 <!-- Modal -->
 <div class="modal fade" id="infoModal" tabindex="-1" role="dialog" aria-labelledby="infoModalLabel" aria-hidden="true">
@@ -52,43 +59,62 @@
     </div>
 </div>
 
-{if $isCertified == true}
-    {include "module:myloanconnector/views/templates/hook/hc-calculator-dialog.tpl"}
+{*{if $isCertified == true}
+
     <script>
 
         $(document).ready(function () {
-
+            let body = document.querySelector('body');
+            let element = document.getElementById('infoModal');
+            if (!!body && !!element) {
+                body.appendChild(element);
+            }
             $('#hc-select-payment').click(function (e) {
-                showCalc();
+
+                if(e.originalEvent.target.id === "hc-info"){
+                    showInfo();
+                    return;
+                }
+                console.info(e.originalEvent.target);
+                if(e.originalEvent.target.id === "hc-info"){
+                    showInfo();
+                    return;
+                }
+
+                if (isLoanCookieValid()) {
+                    if(e.originalEvent.target.id === "hc-change-payment"){
+                        showCalc();
+                    } else {
+                        window.location.href = "{$actionUrl|escape:'quotes'}";
+                    }
+                } else {
+                    showCalc();
+                }
             });
         });
 
         function showCalc() {
             let apiKey = '{$apiKey|escape:'quotes'}';
-            showHcCalc('{$productSetCode|escape:'htmlall':'UTF-8'}', {$cartOrderTotal|escape:'htmlall':'UTF-8'}, 0, false, decodeURI(decodeURIComponent('{$calcUrl|escape:'url'}')), apiKey, processCalcResult);
+            showHcCalc('{$productSetCode|escape:'htmlall':'UTF-8'}', {$cartOrderTotal|escape:'htmlall':'UTF-8'}, 0, false, '{$calcUrl|escape:'quotes'}', apiKey, processCalcResult);
         }
 
         function processCalcResult(calcResult) {
             calcResult.productPrice = {$cartOrderTotal|escape:'htmlall':'UTF-8'};
             $.cookie("hc_calculator", JSON.stringify(calcResult));
             $.ajax({
-                url: decodeURI(decodeURIComponent("{$calcPostUrl|escape:'url'}")),
+                url: "{$calcPostUrl|escape:'quotes'}",
                 data: {literal}{hc_calculator: JSON.stringify(calcResult)}{/literal},
                 method: 'POST',
-                crossDomain: false,
+                crossDomain: true,
                 dataType: 'json',
+                complete: function() {
+                    window.location.href = "{$actionUrl|escape:'quotes'}";
+                },
             });
-
-            $("#loan-overview").html(
-                calcResult.preferredDownPayment/100 + " "
-                + "{$currency.sign|escape:'quotes'}" + " + "
-                + calcResult.preferredMonths + " x "
-                + calcResult.preferredInstallment/100 + " "
-                + "{$currency.sign|escape:'quotes'}"
-            );
         }
 
         function isLoanCookieValid() {
+            console.info(!$.cookie("hc_calculator"));
             if (!$.cookie("hc_calculator")) {
                 return false
             }
@@ -96,13 +122,23 @@
             let loanCookie = $.parseJSON($.cookie("hc_calculator"));
             return (Math.round(loanCookie.creditAmount) == Math.round({$cartOrderTotal|escape:'quotes'}));
         }
+        
+        function showInfo() {
+            $('#infoModal').modal('toggle');
+        }
 
     </script>
 {else}
+    <script>
 
-{/if}
-<script>
-    function showInfo() {
-        $('#infoModal') .modal('toggle');
-    }
-</script>
+        $(document).ready(function () {
+
+            $('#hc-select-payment').click(function () {
+                window.location.href = "{$actionUrl|escape:'quotes'}";
+            });
+        });
+
+    </script>
+{/if}*}
+{*moved to header TPL of the module*}
+
