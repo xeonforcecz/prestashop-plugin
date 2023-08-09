@@ -9,8 +9,6 @@ if (!defined('_PS_VERSION_')) {
     exit;
 }
 
-use PrestaShop\PrestaShop\Core\Payment\PaymentOption;
-
 include(dirname(__FILE__) . DIRECTORY_SEPARATOR . 'vendor/autoload.php');
 
 class MyLoanConnector extends PaymentModule
@@ -23,7 +21,7 @@ class MyLoanConnector extends PaymentModule
         $this->author = 'HN Consulting Brno, s.r.o.';
         $this->controllers = array('downPayment', 'changePayment', 'loanNotification', 'loanUpdate');
         $this->need_instance = 0;
-        $this->ps_versions_compliancy = array('min' => '1.6.1.1', 'max' => _PS_VERSION_);
+        $this->ps_versions_compliancy = array('min' => '1.6.1.0', 'max' => _PS_VERSION_);
         $this->bootstrap = true;
 
         parent::__construct();
@@ -33,7 +31,7 @@ class MyLoanConnector extends PaymentModule
 
         if (isset($this->context->employee) && $this->context->employee->isLoggedBack()) {
             if (!MlcConfig::isModuleConfigured()) {
-                $this->warning = $this->l('Module must be configured first!');
+                $this->warning = $this->l('Module must be configured first!', __CLASS__);
             }
         }
 
@@ -155,6 +153,51 @@ class MyLoanConnector extends PaymentModule
                 );
                 $this->context->controller->addJS($this->_path . "/views/js/appLoader-sk.js");
         }
+        $cartOrderTotal = $this->context->cart->getOrderTotal();
+
+        if (!\MyLoan\Tools::shouldHookModule($cartOrderTotal)) {
+            return false;
+        }
+
+        $cartOrderTotal = \MyLoan\Tools::convertNumberToMinorUnits(
+            $cartOrderTotal,
+            $this->context->currency->iso_code
+        );
+
+        $productSetCode = \MyLoan\Tools::getCartProductsSetCode($this->context->cart->getProducts());
+        $productId = "";
+        $productPrice = 0;
+        if(isset($hookParams["product"])) {
+            $productId = $hookParams["product"]->id;
+            $productPrice = \MyLoan\Tools::getProductPriceInMinorUnits($productId);
+        }
+        $this->context->controller->addCSS(dirname(__FILE__) . "/views/css/myloan.css");
+
+        $this->context->smarty->assign(
+            [
+                "isCertified" => MlcConfig::get(MlcConfig::API_CERTIFIED),
+                "loanOverview" => \MyLoan\Tools::getLoanOverview($cartOrderTotal),
+                "calcUrl" => \MyLoan\Tools::genCalculatorUrl($cartOrderTotal, $productSetCode),
+                "calcPostUrl" => Context::getContext()->link->getModuleLink(
+                    MlcConfig::MODULE_NAME,
+                    'payment'
+                ),
+                "productId" => $productId,
+                "productPrice" => $productPrice,
+                "productSetCode" => $productSetCode,
+                "apiKey" => \MlcConfig::get(\MlcConfig::API_CALC_KEY),
+                'hcLogo' => \MyLoan\Tools::getImagePath("hc-logo.svg"),
+                'actionUrl' => $this->context->link->getModuleLink(
+                    MlcConfig::MODULE_NAME,
+                    'payment',
+                    ['cartID' => $this->context->cart->id],
+                    true
+                ),
+                'cartOrderTotal' => $cartOrderTotal,
+                "minimalPrice" => array("CZK" => \Loan::MINIMAL_PRICE_CZK, "EUR" => \Loan::MINIMAL_PRICE_EUR)
+            ]
+        );
+        return $this->display(__FILE__, '/views/templates/front/header.tpl');
     }
 
     /**
@@ -163,14 +206,11 @@ class MyLoanConnector extends PaymentModule
      */
     public function hookDisplayProductButtons($hookParams)
     {
-        $context = \Context::getContext();
-        $productPrice = \MyLoan\Tools::getProductPriceInMinorUnits($hookParams["product"]["id"]);
-
         if (!\MyLoan\Tools::shouldHookModule(false)) {
             return false;
         }
 
-        $productId = $hookParams["product"]["id"];
+        $productId = $hookParams["product"]->id;
         $productPrice = \MyLoan\Tools::getProductPriceInMinorUnits($productId);
         $productSetCode = \MyLoan\Tools::getProductSetCode($productId);
 
@@ -189,14 +229,17 @@ class MyLoanConnector extends PaymentModule
           "apiKey" => \MlcConfig::get(\MlcConfig::API_CALC_KEY),
           "minimalPrice" => array("CZK" => \Loan::MINIMAL_PRICE_CZK, "EUR" => \Loan::MINIMAL_PRICE_EUR)
         ));
+        $this->context->controller->addJS(_PS_JS_DIR_.'jquery/plugins/jquery.cooki-plugin.js');
+        $this->context->controller->addJS(dirname(__FILE__) . "/views/js/iframeResizer.min.js");
 
+        $this->context->controller->addJS(dirname(__FILE__) . "/views/js/calculator.js");
         return $this->display(__FILE__, "calculator.tpl");
     }
 
     /**
      * @return bool|void
      */
-    public function hookPaymentOptions()
+    public function hookPayment()
     {
         $cartOrderTotal = $this->context->cart->getOrderTotal();
 
@@ -225,37 +268,23 @@ class MyLoanConnector extends PaymentModule
             "productSetCode" => $productSetCode,
             "apiKey" => \MlcConfig::get(\MlcConfig::API_CALC_KEY),
             'hcLogo' => \MyLoan\Tools::getImagePath("hc-logo.svg"),
+            'actionUrl' => $this->context->link->getModuleLink(
+                MlcConfig::MODULE_NAME,
+                'payment',
+                ['cartID' => $this->context->cart->id],
+                true
+            ),
             'cartOrderTotal' => $cartOrderTotal
             ]
         );
-
-        $newOption = new PaymentOption();
-
-        try {
-
-            $newOption->setModuleName($this->name)
-                ->setCallToActionText('HomeCredit')
-                //->setLogo(\MyLoan\Tools::getImagePath("hc-logo.svg"))
-                ->setAction($this->context->link->getModuleLink(
-                    MlcConfig::MODULE_NAME,
-                    'payment',
-                    ['cartID' => $this->context->cart->id],
-                    true
-                ))
-                ->setAdditionalInformation($this->context->smarty->fetch('module:myloanconnector/views/templates/hook/payment.tpl'));
-
-        } catch(Exception $e){
-
-            $this->_errors[] = "Payment option error: $e->getMessage()";
-            die($e);
-
+        $this->context->controller->addJS(_PS_JS_DIR_.'jquery/plugins/jquery.cooki-plugin.js');
+        $this->context->controller->addJS(dirname(__FILE__) . "/views/js/iframeResizer.min.js");
+        if(MlcConfig::get(MlcConfig::API_CERTIFIED)){
+            $this->context->controller->addJS(dirname(__FILE__) . "/views/js/certified.js");
+        }else{
+            $this->context->controller->addJS(dirname(__FILE__) . "/views/js/notCertified.js");
         }
-
-        $payment_options = [
-          $newOption,
-        ];
-
-        return $payment_options;
+        return $this->display(__FILE__, 'payment.tpl');
     }
 
     /**
@@ -309,7 +338,7 @@ class MyLoanConnector extends PaymentModule
                 }
             }
 
-            if (is_null($response) || array_key_exists("errors", $response)) {
+            if (array_key_exists("errors", $response)) {
                 \MyLoan\Tools::addMyError(
                   $this->l("HomeCredit change order stare error", __CLASS__) . ":" .
                   $response["errors"][0]["message"]
@@ -393,7 +422,7 @@ class MyLoanConnector extends PaymentModule
     {
         $params['fields'] += [
           'downpayment' => [
-            'title' => $this->l('Downpayment'),
+            'title' => $this->l('Downpayment', __CLASS__),
             'search' => false,
           ],
         ];
